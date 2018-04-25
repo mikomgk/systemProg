@@ -1,0 +1,81 @@
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+dabcefLMNOpQrstuv567zyx
+
+Your shortened string is:
+da-cefL-OpQr-v567zyx
+
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+AbcdFghiKnjlm
+
+Your shortened string is:
+Ab-dFg-iKnjlm
+
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+ABCDefgHIjklmnoPQRSTUVWXyz{
+
+Your shortened string is:
+A-De-gHIj-oP-Xyz{
+
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+123456ABC
+
+Your shortened string is:
+123456A-C
+
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+yz{|}~abcdef
+
+Your shortened string is:
+yz{|}~a-f
+
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+YZ[\]^_`abcd
+
+Your shortened string is:
+YZ[\]^_`a-d
+
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+XYZabc
+
+Your shortened string is:
+X-Za-c
+
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+abccdeffghiijkkk
+
+Your shortened string is:
+a-cc-ff-ii-kkk
+
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+abc defg hi g k l m nopqrs
+
+Your shortened string is:
+a-c d-g hi g k l m n-s
+
+Enter a string you want to make shortened(enter to quit)
+
+Your long string is:
+abcdrfghikjlmnopqrstuvwxyz
+
+Your shortened string is:
+a-drf-ikjl-z
+
+Enter a string you want to make shortened(enter to quit)
