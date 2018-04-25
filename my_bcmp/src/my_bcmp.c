@@ -27,7 +27,8 @@ int main() {
 	extern int error;
 	while (inputs != EOF) {
 		error = 0;
-		puts("Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)\n");
+		puts(
+				"Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)\n");
 		if ((inputs = scanf("%f %f %f %s", &len, &i, &j, s)) == 4) {
 			checkIfInt(len, "The length");
 			checkIfPositive(len, "The length");
@@ -48,8 +49,7 @@ int main() {
 					printf("0\n\n\n");
 				else
 					printf("%d\n\n\n", my_bcmp(a, b, (int) len));
-			}
-			else
+			} else
 				puts("\n");
 		} else {
 			puts("You entered incorrect data");
@@ -61,7 +61,7 @@ int main() {
 
 int my_bcmp(const void *b1, const void *b2, size_t len) {
 	char *a1 = (char *) b1, *a2 = (char *) b2;
-	while (*(a1++) == *(a2++) && len-- > 1)
+	while (*a1++ == *a2++ && len-- > 1)
 		;
 	return *(--a1) - *(--a2);
 }
