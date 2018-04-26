@@ -6,6 +6,9 @@
 C_SRCS += \
 ../src/my_bcmp.c 
 
+O_SRCS += \
+../src/abcd.o 
+
 OBJS += \
 ./src/my_bcmp.o 
 

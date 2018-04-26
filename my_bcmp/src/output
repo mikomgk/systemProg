@@ -1,0 +1,107 @@
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+Length of bytes to compare = 10
+The first index to compare from = 1
+The second index to compare from = 16
+The string you want to check = abcdefghijklmnoabcdefghijklmno
+
+0
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+Length of bytes to compare = 10
+The first index to compare from = 1
+The second index to compare from = 15
+The string you want to check = abcdefghijklmnoabcdefghijklmno
+
+1
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+Length of bytes to compare = 0
+The first index to compare from = 1
+The second index to compare from = 2
+The string you want to check = abcdefg
+
+0
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+Length of bytes to compare = 100
+The first index to compare from = 50
+The second index to compare from = 50
+The string you want to check = abc
+
+0
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+Length of bytes to compare = 5
+The first index to compare from = 0
+The second index to compare from = 3
+The string you want to check = dddddddc
+
+1
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+Length of bytes to compare = 5
+The first index to compare from = 0
+The second index to compare from = 6
+The string you want to check = abcdezabcda
+
+4
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+Length of bytes to compare = 5
+The first index to compare from = 1
+The second index to compare from = 5
+The string you want to check = abdefghijkl
+
+-5
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+Length of bytes to compare = 300
+The first index to compare from = 200
+The second index to compare from = 100
+The string you want to check = abc
+
+125
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+The length must be an integer number
+The length must be zero or bigger
+The first index must be an integer number
+The first index must be zero or bigger
+The second index must be zero or bigger
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+The first index must be zero or bigger
+The second index must be an integer number
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+The length must be an integer number
+The first index must be an integer number
+The first index must be zero or bigger
+The second index must be an integer number
+These indexes and length make a stack overflow
+
+
+Enter length to check, 2 index to begin from and a string, separated with space (enter exit to exit)
+
+You entered incorrect data
