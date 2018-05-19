@@ -48,11 +48,11 @@ int main() {
 					printf("0\n\n\n");
 				else
 					printf("%d\n\n\n", my_bcmp(a, b, (int) len));
-			}
-			else
+			} else
 				puts("\n");
 		} else {
-			puts("You entered incorrect data");
+			if (inputs != EOF)
+				puts("You entered incorrect data");
 			inputs = EOF;
 		}
 	}
