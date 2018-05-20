@@ -9,7 +9,7 @@
 #define MAX_LINE 80
 
 typedef struct {
-	unsigned set :128;
+	unsigned set :MAX_NUM;
 } set;
 
 void read_set(set dest, int *src);
