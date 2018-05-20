@@ -1,7 +1,7 @@
 /*
  ============================================================================
  Name        : myset.c
- Author      : 
+ Author      :
  Version     :
  Copyright   : Your copyright notice
  Description : Hello World in C, Ansi-style
@@ -11,17 +11,29 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-
-#include "set.h"
+#include <math.h>
 
 #define MAX_COMMAND 14
 #define MAX_SETPARAMS 3
+#define MAX_NUM 128
+#define MAX_LINE 80
+#define BITS_PER_BITE 8
+#define MAX_NUM_ROW 16
+
+typedef struct {
+	char set[MAX_NUM / BITS_PER_BITE];
+} set;
 
 int checkParams(int parametersCollected, int parametersTarget);
 void removeBlanks(char *s);
 int getCommand(char *s, char *command);
 int getParams(char *src, char *setParams, int *listParam);
 void error(int i);
+void read_set(set dest, int *src);
+void print_set(set src);
+void union_set(set src1, set src2, set dest);
+void intersect_set(set src1, set src2, set dest);
+void sub_set(set src1, set src2, set dest);
 
 int main() {
 	set sets[6];
@@ -227,3 +239,44 @@ void error(int i) {
 		puts("Wrong parameters entered");
 }
 
+void read_set(set dest, int *src) {
+	int i;
+	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
+		dest.set[i] = 0;
+	for (; *src != -1; src++)
+		dest.set[*src / BITS_PER_BITE] = dest.set[*src / BITS_PER_BITE] | (int) pow(2, *src % BITS_PER_BITE);
+}
+
+void print_set(set src) {
+	int count = 0, i, j;
+	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
+		for (j = 0; j < BITS_PER_BITE; j++)
+			if ((src.set[i] & (int) pow(2, j)) == (int) pow(2, j)) {
+				count++;
+				if (count % MAX_NUM_ROW != 1)
+					printf(", ");
+				printf("%d", BITS_PER_BITE * i + j);
+				if (count % MAX_NUM_ROW == 0)
+					printf("\n");
+			}
+	if (count == 0)
+		puts("The set is empty");
+}
+
+void union_set(set src1, set src2, set dest) {
+	int i;
+	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
+		dest.set[i] = src1.set[i] | src2.set[i];
+}
+
+void intersect_set(set src1, set src2, set dest) {
+	int i;
+	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
+		dest.set[i] = src1.set[i] & src2.set[i];
+}
+
+void sub_set(set src1, set src2, set dest) {
+	int i;
+	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
+		dest.set[i] = src1.set[i] & (~(src1.set[i] & src2.set[i]));
+}
