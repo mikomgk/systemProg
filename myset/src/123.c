@@ -51,6 +51,13 @@ int main() {
 	return 0;
 }
 
+/*
+ * Checks if the number of parameters collected is correct, if not prints the relevant error
+ *
+ * @param parametersCollected is the number of the parameters collected
+ * @param parametersTarget the number of parameters that suppose to be
+ * @return 0 if it's incorrect 1 if it's correct
+ */
 int checkParams(int parametersCollected, int parametersTarget) {
 	if (parametersCollected > parametersTarget) {
 		error(7);
@@ -63,6 +70,9 @@ int checkParams(int parametersCollected, int parametersTarget) {
 	return 1;
 }
 
+/*
+ * Removes spaces and tabs from *src
+ */
 void removeBlanks(char *src) {
 	char *pnt = src;
 	for (; *src; *pnt++ = *src++)
@@ -71,6 +81,9 @@ void removeBlanks(char *src) {
 	*pnt = '\0';
 }
 
+/*
+ * Checks if the first word (without spaces) from *src is a command and returns an enum of the command, -1 if there was an error
+ */
 int getCommand(char *src) {
 	char command[MAX_COMMAND], *pntCommand = command, *startSrc = src;
 	for (; *src == ' ' || *src == '\t'; src++)
@@ -101,6 +114,11 @@ int getCommand(char *src) {
 	}
 }
 
+/*
+ * Extracts the parameters out of *src and insert them to *setParams and *numList
+ *
+ * @return Returns the number of parameters collected, -1 if there was an error
+ */
 int getParams(char *src, char *setParams, int *numList) {
 	int sets = 0, paramIsNum = 0, num = 0;
 	removeBlanks(src);
@@ -168,6 +186,9 @@ int getParams(char *src, char *setParams, int *numList) {
 	return sets + paramIsNum; //number of parameters
 }
 
+/*
+ * Prints an error message by the given error code
+ */
 void error(int i) {
 	if (i == 1)
 		puts("Undefined set name");
