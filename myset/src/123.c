@@ -1,106 +1,68 @@
-/*
- ============================================================================
- Name        : myset.c
- Author      :
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include <math.h>
 
+#include "set.h"
+
+#define MAX_LINE 80
 #define MAX_COMMAND 14
 #define MAX_SETPARAMS 3
-#define MAX_NUM 128
-#define MAX_LINE 80
-#define BITS_PER_BITE 8
-#define MAX_NUM_ROW 16
 
-typedef struct {
-	char set[MAX_NUM / BITS_PER_BITE];
-} set;
+enum commands {
+	READ_SET, PRINT_SET, UNION_SET, INTERSECT_SET, SUB_SET, STOP
+};
 
 int checkParams(int parametersCollected, int parametersTarget);
-void removeBlanks(char *s);
-int getCommand(char *s, char *command);
-int getParams(char *src, char *setParams, int *listParam);
+void removeBlanks(char *src);
+int getCommand(char *src);
+int getParams(char *src, char *setParams, int *numList);
 void error(int i);
-void read_set(set dest, int *src);
-void print_set(set src);
-void union_set(set src1, set src2, set dest);
-void intersect_set(set src1, set src2, set dest);
-void sub_set(set src1, set src2, set dest);
 
 int main() {
 	set sets[6];
-	char userCommand[MAX_LINE], command[MAX_COMMAND], setParams[MAX_SETPARAMS];
-	int listParam[MAX_LINE], parametersCollected, commandStatus;
-	while (strcmp(command, "stop") != 0) {
-		if (fgets(userCommand, MAX_LINE, stdin) == NULL) {
-			puts(userCommand);
-			puts("You didn't use the stop command to quit the program");
-			strcpy(command, "stop");
+	char userLine[MAX_LINE], setParams[MAX_SETPARAMS];
+	int numList[MAX_LINE], parametersCollected, command = READ_SET;
+	while (command == STOP)
+		if (fgets(userLine, MAX_LINE, stdin) == NULL) { //EOF without stop command
+			error(13);
 			break;
-		}
-		puts(userCommand);
-		if ((commandStatus = getCommand(userCommand, command)) == 0)
-			error(2);
-		else if (commandStatus != -1) {
-			removeBlanks(userCommand);
-			if ((parametersCollected = getParams(userCommand, setParams, listParam)) != -1) {
-				if (strcmp(command, "read_set") == 0) {
+		} else if ((command = getCommand(userLine)) != -1) { //command is OK
+			if ((parametersCollected = getParams(userLine, setParams, numList)) != -1) { //params are OK
+				if (command == READ_SET)
 					if (checkParams(parametersCollected, 2))
-						read_set(sets[setParams[0] - 'A'], listParam);
-				} else if (strcmp(command, "print_set") == 0) {
+						read_set(sets[setParams[0]], numList);
+				if (command == PRINT_SET)
 					if (checkParams(parametersCollected, 1))
-						print_set(sets[setParams[0] - 'A']);
-				} else if (strcmp(command, "union_set") == 0) {
+						read_set(sets[setParams[0]]);
+				if (command == UNION_SET)
 					if (checkParams(parametersCollected, 3))
-						union_set(sets[setParams[0] - 'A'], sets[setParams[1] - 'A'], sets[setParams[2] - 'A']);
-				} else if (strcmp(command, "read_set") == 0) {
+						read_set(sets[setParams[0]], sets[setParams[1]], sets[setParams[2]]);
+				if (command == INTERSECT_SET)
 					if (checkParams(parametersCollected, 3))
-						intersect_set(sets[setParams[0] - 'A'], sets[setParams[1] - 'A'], sets[setParams[2] - 'A']);
-				} else if (strcmp(command, "sub_set") == 0) {
+						read_set(sets[setParams[0]], sets[setParams[1]], sets[setParams[2]]);
+				if (command == SUB_SET)
 					if (checkParams(parametersCollected, 3))
-						sub_set(sets[setParams[0] - 'A'], sets[setParams[1] - 'A'], sets[setParams[2] - 'A']);
-				} else if (strcmp(command, "stop") == 0) {
-					if (parametersCollected > 0) {
-						error(7);
-						strcpy(command, "");
-					}
-				} else
-					error(2);
+						read_set(sets[setParams[0]], sets[setParams[1]], sets[setParams[2]]);
+				if (command == STOP)
+					if (!checkParams(parametersCollected, 0)) //stop gets parameters
+						command=READ_SET;
 			}
 		}
-	}
 	return 0;
 }
 
-/*
- * Validates if the number of parameters are correct
- *
- * @param *parametersCollected the number of parameters entered
- * @param *parametersTarget the number of parameters that suppose to be
- * @return 0 if it's incorrect 1 if it's correct
- */
 int checkParams(int parametersCollected, int parametersTarget) {
 	if (parametersCollected > parametersTarget) {
 		error(7);
 		return 0;
-	} else if (parametersCollected < parametersTarget) {
+	}
+	if (parametersCollected < parametersTarget) {
 		error(6);
 		return 0;
 	}
 	return 1;
 }
 
-/*
- * Removes spaces and tabs from *src
- */
 void removeBlanks(char *src) {
 	char *pnt = src;
 	for (; *src; *pnt++ = *src++)
@@ -109,111 +71,103 @@ void removeBlanks(char *src) {
 	*pnt = '\0';
 }
 
-/*
- * Copy the first word from *src to *command and deletes it from *src
- *
- * @return the number of chars copied to command or -1 if there was an error
- */
-int getCommand(char *src, char *command) {
-	int counter = 0;
-	char *start = src;
+int getCommand(char *src) {
+	char command[MAX_COMMAND], *pntCommand = command, *startSrc = src;
 	for (; *src == ' ' || *src == '\t'; src++)
 		;
-	for (; (isalpha(*src) || *src == '_') && counter < 13; *command++ = *src++, counter++)
+	for (; isalpha(*src) || *src == '_' || *src != ' '; *pntCommand++ == *src++)
 		;
+	*pntCommand = '\0';
+	strcpy(startSrc, src);
 	if (*src == ',') {
 		error(10);
 		return -1;
 	}
-	*command = '\0';
-	if (strcmp(command - counter, "read_set") != 0 && strcmp(command - counter, "print_set") != 0
-			&& strcmp(command - counter, "union_set") != 0 && strcmp(command - counter, "intersect_set") != 0
-			&& strcmp(command - counter, "sub_set") != 0 && strcmp(command - counter, "stop") != 0) {
+	if (strcmp(command, "read_set") == 0)
+		return READ_SET;
+	if (strcmp(command, "print_set") == 0)
+		return PRINT_SET;
+	if (strcmp(command, "union_set") == 0)
+		return UNION_SET;
+	if (strcmp(command, "intersect_set") == 0)
+		return INTERSECT_SET;
+	if (strcmp(command, "sub_set") == 0)
+		return SUB_SET;
+	if (strcmp(command, "stop") == 0)
+		return STOP;
+	else {
 		error(2);
 		return -1;
 	}
-	strcpy(start, src);
-	return counter;
 }
 
-/*
- * Get the parameters out of *src and puts a letter to *setParams or an int to *listParam
- *
- * @return the number of parameters collected from *src or -1 if there was an error
- */
-int getParams(char *src, char *setParams, int *listParam) {
-	char *firstParam = setParams;
-	int num = 0, paramIsDigit = 0;
-	;
+int getParams(char *src, char *setParams, int *numList) {
+	int sets = 0, paramIsNum = 0, num = 0;
+	removeBlanks(src);
 	for (; *src; src++) {
-		if (paramIsDigit == 0 && isalpha(*src))
-			if (*src++ == 'S' && *src++ == 'E' && *src++ == 'T')
-				if (setParams - firstParam < MAX_SETPARAMS)
-					if (*src >= 'A' && *src <= 'F') {
-						*setParams++ = *src++;
-						if (*src && *src != ',') {
-							error(9);
-							return -1;
-						}
-					} else {
-						error(1);
-						return -1;
-					}
-				else {
-					error(7);
+		if (sets == MAX_SETPARAMS) { //too many parameters
+			error(7);
+			return -1;
+		}
+		if (isalpha(*src) && paramIsNum == 1) { //alpha after numbers - wrong parameters
+			error(11);
+			return -1;
+		}
+		if (isalpha(*src))
+			if (*src++ == 'S' && *src++ == 'E' && *src++ == 'T' && *src >= 'A' && *src++ <= 'F') {
+				if (*src && *src != ',') { //no comma after set name
+					error(9);
 					return -1;
-				}
-			else {
+				} else if (*src && *(src + 1) && *(src + 1) == ',') { //2 commas together
+					error(8);
+					return -1;
+				} else if (*src && !*(src + 1)) { //command ends with a comma
+					error(12);
+					return -1;
+				} else
+					//writes the letter of the set
+					setParams[sets++] = *(src - 1);
+			} else { //no such set
 				error(1);
 				return -1;
 			}
 		else if (isdigit(*src)) {
-			paramIsDigit = 1;
-			for (; isdigit(*src); src++)
-				num = 10 * num + *src + '0';
-			if (num < MAX_NUM)
-				*listParam++ = num;
-			else {
-				error(3);
-				return -1;
-			}
-			if (*src == '.') {
+			paramIsNum = 1;
+			for (; *src && isdigit(*src); src++)
+				num = num * 10 + *src + '0';
+			*numList++ = num;
+			if (*src++ != ',') { //interrupted with a non digit sign or a comma
 				error(4);
 				return -1;
 			}
-			if (*src != ',') {
-				error(9);
-				return -1;
-			}
-		} else if (*(src + 1) == ',') {
-			error(8);
-			return -1;
-		} else if (*src++ == '-')
-			if (*src++ == '1' && !*src)
-				*listParam = -1;
-			else {
+			if (num >= MAX_NUM) { //num too big
 				error(3);
 				return -1;
 			}
-		else {
-			error(4);
+		} else if (*src == ',') { //2 commas together
+			error(8);
+			return -1;
+		} else if (*src++ == '-') {
+			if ((*src++ != '1') || (*src)) { //has a negative number
+				error(3);
+				return -1;
+			}
+		} else { //not a digit or an alpha
+			error(11);
 			return -1;
 		}
 	}
-	if (*--src != '1' || *--src != '-') {
+	if (paramIsNum == 1 && (*--src != '1' || *--src != '-')) { //number aren't ending with -1
 		error(5);
 		return -1;
 	}
-	if (paramIsDigit == 1 && setParams - firstParam != 1) {
+	if (paramIsNum == 1 && sets != 1) { //there is a list of numbers and not exactly 1 set - wrong params
 		error(11);
 		return -1;
 	}
-	return setParams - firstParam + (paramIsDigit == 1 ? 1 : 0);
+	return sets + paramIsNum; //number of parameters
 }
 
-/*
- * Prints an error message by the  given error code
- */
 void error(int i) {
 	if (i == 1)
 		puts("Undefined set name");
@@ -237,46 +191,8 @@ void error(int i) {
 		puts("Illegal comma");
 	if (i == 11)
 		puts("Wrong parameters entered");
-}
-
-void read_set(set dest, int *src) {
-	int i;
-	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
-		dest.set[i] = 0;
-	for (; *src != -1; src++)
-		dest.set[*src / BITS_PER_BITE] = dest.set[*src / BITS_PER_BITE] | (int) pow(2, *src % BITS_PER_BITE);
-}
-
-void print_set(set src) {
-	int count = 0, i, j;
-	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
-		for (j = 0; j < BITS_PER_BITE; j++)
-			if ((src.set[i] & (int) pow(2, j)) == (int) pow(2, j)) {
-				count++;
-				if (count % MAX_NUM_ROW != 1)
-					printf(", ");
-				printf("%d", BITS_PER_BITE * i + j);
-				if (count % MAX_NUM_ROW == 0)
-					printf("\n");
-			}
-	if (count == 0)
-		puts("The set is empty");
-}
-
-void union_set(set src1, set src2, set dest) {
-	int i;
-	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
-		dest.set[i] = src1.set[i] | src2.set[i];
-}
-
-void intersect_set(set src1, set src2, set dest) {
-	int i;
-	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
-		dest.set[i] = src1.set[i] & src2.set[i];
-}
-
-void sub_set(set src1, set src2, set dest) {
-	int i;
-	for (i = 0; i < MAX_NUM / BITS_PER_BITE; i++)
-		dest.set[i] = src1.set[i] & (~(src1.set[i] & src2.set[i]));
+	if (i == 12)
+		puts("Command cannot terminate with a comma");
+	if (i == 13)
+		puts("You didn't use the stop command to quit the program");
 }

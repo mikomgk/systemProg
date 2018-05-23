@@ -18,8 +18,8 @@
 #define MAX_SETPARAMS 3
 
 int checkParams(int parametersCollected, int parametersTarget);
-void removeBlanks(char *s);
-int getCommand(char *s, char *command);
+void removeBlanks(char *src);
+int getCommand(char *src, char *command);
 int getParams(char *src, char *setParams, int *listParam);
 void error(int i);
 

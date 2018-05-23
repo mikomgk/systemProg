@@ -6,7 +6,6 @@
  */
 
 #define MAX_NUM 128
-#define MAX_LINE 80
 #define BITS_PER_BITE 8
 
 typedef struct {
