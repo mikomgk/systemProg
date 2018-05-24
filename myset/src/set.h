@@ -1,19 +1,23 @@
 /*
  * set.h
  *
- *  Created on: May 19, 2018
+ *  Created on: May 23, 2018
  *      Author: user
  */
 
-#define MAX_NUM 128
+#include <stdio.h>
+
+#define MAX_NUM 127
 #define BITS_PER_BITE 8
 
 typedef struct {
-	char set[MAX_NUM/BITS_PER_BITE];
+	char data[(MAX_NUM + BITS_PER_BITE - 1) / BITS_PER_BITE];
 } set;
 
-void read_set(set dest, int *src);
+set emprtySet;
+
+set read_set(int *src);
 void print_set(set src);
-void union_set(set src1, set src2, set dest);
-void intersect_set(set src1, set src2, set dest);
-void sub_set(set src1, set src2, set dest);
+set union_set(set src1, set src2);
+set intersect_set(set src1, set src2);
+set sub_set(set src1, set src2);
