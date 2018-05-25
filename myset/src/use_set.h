@@ -14,9 +14,10 @@
 set emprtySet;
 
 void strTrim(char *src);
-void strParse(char *src, char *cmdName, char *setParamArr);
-void setNamesToSets(const char *setParamNamesArr, char*setParamArr, const char *setsNames,
+void strParse(char *src, char *cmdName, char *setParamNamesArr[]);
+void getNumArr(char*src, int*numArr);
+void setNamesToSets(const char*setParamNamesArr[], set*setParamArr[], const char*setsNames[],
 		set *setArr);
-set* cmdNameToCmd(const char *cmdName, const char *cmdNames, set *cmdArr, int *numParam,
+set* cmdNameToCmd(const char *cmdName, const char *cmdNames, set* *cmdArr, int *numParam,
 		int paramsCollected);
 void error(int errorCode);

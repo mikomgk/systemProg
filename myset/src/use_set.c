@@ -6,6 +6,7 @@
  */
 
 #include <ctype.h>
+#include <string.h>
 
 #include "use_set.h"
 
@@ -31,33 +32,38 @@ void strTrim(char *src) {
 /*
  * Parse words out of src
  */
-void strParse(char *src, char *cmdName, char *setParamArr) {
-	strcpy(setParamArr[0], "");
-	strcpy(setParamArr[1], "");
-	strcpy(setParamArr[2], "");
-	strcpy(setParamArr[3], "");
-	sscanf(src, "%s%s ,%s ,%s%s", cmdName, *setParamArr[0], *setParamArr[1], *setParamArr[2],
-			*setParamArr[3]);
+void strParse(char *src, char *cmdName, char *setParamNamesArr[]) {
+	for (; *setParamNamesArr; setParamNamesArr++)/*initialize parameters containers*/
+		**setParamNamesArr = '\0';
+	sscanf(src, "%s%s ,%s ,%s%s", cmdName, setParamNamesArr[0], setParamNamesArr[1],
+			setParamNamesArr[2], setParamNamesArr[3]);
+}
+
+/*
+ *
+ */
+void getNumArr(char*src, int*numArr) {
+
 }
 
 /*
  * Returns a pointer to a set by the given set name, NULL if there's no such set
  */
-void setNamesToSets(const char *setParamNamesArr, char*setParamArr, const char *setsNames,
+void setNamesToSets(const char*setParamNamesArr[], set*setParamArr[], const char*setsNames[],
 		set *setArr) {
 	int i = 0, j = 0;
-	for (; setParamNamesArr[i]; i++){
-		for (; setsNames[j] && strcmp(setParamNamesArr[i], setsNames[j]); j++)
+	for (; *(setParamNamesArr[i]); i++) {
+		for (; *(setsNames[j]) && !strcmp(*(setParamNamesArr[i]), *(setsNames[j])); j++)
 			;
-		setParamArr[i]=setArr[j];
+		*setParamArr[i] = setArr[j];
 	}
 }
 
 /*
  * Returns a pointer to the command function by the given command name,
- * NULL if there's no such command or there was an error
+ * NULL if there's no such command or there's wrong number of parameters
  */
-set cmdNameToCmd(const char *cmdName, const char *cmdNames, set *cmdArr, int *numParam,
+set* cmdNameToCmd(const char *cmdName, const char *cmdNames, set* *cmdArr, int *numParam,
 		int paramsCollected) {
 	int i = 0;
 	for (; cmdNames[i] && strcmp(cmdName, cmdNames[i]); i++)
