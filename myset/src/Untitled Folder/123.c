@@ -1,20 +1,134 @@
-/*
- * use_set.c
- *
- *  Created on: May 24, 2018
- *      Author: user
- */
-
+#include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "use_set.h"
+#define MAX_NUM 127
+#define BITS_PER_BITE 8
+#define MAX_NUM_ROW 16
+#define MAX_LINE 80
+#define MAX_COMMAND 14
 
-/*
- * Deletes unnecessary spaces from src and checks if there are two, missing or illegal commas
- * or if src end with a comma and prints a relevant error message.
- * Return 1. 0 if there's an error
- */
+typedef struct {
+	char data[(MAX_NUM + BITS_PER_BITE - 1) / BITS_PER_BITE];
+} set;
+
+set print_set2(set src);
+set stop();
+set read_set(int *src);
+void print_set(set src);
+set union_set(set src1, set src2);
+set intersect_set(set src1, set src2);
+set sub_set(set src1, set src2);
+int str_trimmer(char *src);
+void str_parser(char *src, char *cmdName, char *setParamNamesArr[],char *numStr);
+int getNumArr(char*src, int numArr[]);
+int set_names_to_sets(char*setParamNamesArr[], set*setParamArr[], const char*setsNames[], set *setArr[]);
+set* cmd_name_to_cmd(const char *cmdName, const char *cmdNames[], set*cmdArr[], int *numParam, int paramsCollected);
+void error(int errorCode);
+
+set emptySet = { { 0 } };
+int isStop=0;
+
+int main() {
+	extern set emptySet;
+	extern int isStop;
+	set a = emptySet, b = a, c = a, d = a, e = a, f = a, *leftSet, *rightSet, *resultSet;
+	set*setArr[] = { &a, &b, &c, &d, &e, &f, NULL };
+	set*setParamArr[] = { leftSet, rightSet, resultSet };
+	const char*setsNames[] = { "SETA", "SETB", "SETC", "SETD", "SETE", "SETF", NULL };
+	set (*rs)() = read_set, (*ps)() = print_set2, (*us)() = union_set, (*is)() = intersect_set,
+			(*ss)() = sub_set, (*s)() = stop, (*cmd)();
+	set*cmdArr[] = { rs, ps, us, is, ss, s, NULL };
+	const char*cmdNames[] = { "read_set", "print_set", "union_set", "intersect_set", "sub_set",
+			"stop", NULL };
+	const int numParam[] = { 1, 1, 3, 3, 3, 0 };
+	char line[MAX_LINE], cmdName[MAX_COMMAND], leftSetName[MAX_COMMAND], rightSetName[MAX_COMMAND],
+			resulrSetName[MAX_COMMAND], isNull[MAX_COMMAND],*numStr;
+	char* setParamNamesArr[] = { leftSetName, rightSetName, resulrSetName, isNull, NULL };
+	int i, numArr[MAX_LINE];
+
+	while (!isStop && fgets(line, MAX_LINE, stdin)) {
+		if(!str_trimmer(line))
+			continue;
+		str_parser(line, cmdName, setParamNamesArr,numStr);
+		for (i = 0; *setParamNamesArr[i]; i++)/*count parameters collected*/
+			;
+		if(!set_names_to_sets(setParamNamesArr, setParamArr, setsNames, setArr))
+			continue;
+		if (cmd = cmd_name_to_cmd(cmdName, cmdNames, cmdArr, numParam, i))/*command is correct*/{
+			if (!strcmp(cmdName, cmdNames[0])){/*command is read_set*/
+				if(!getNumArr(line, numArr))
+					continue;
+				*resultSet = cmd(leftSet, numArr);
+			}
+			*resultSet = cmd(leftSet, rightSet);
+		}
+	}
+	if(isStop==0)/*finish without stop command*/
+		error(12);
+	return 0;
+}
+
+set print_set2(set src) {
+	print_set(src);
+	return src;
+}
+
+set stop() {
+	extern set emptySet;
+	isStop=1;
+	return emptySet;
+}
+
+set read_set(int *src) {
+	set dest = emptySet;
+	int i = 0;
+	for (; src[i] != -1; i++)
+		dest.data[*src / BITS_PER_BITE] |= (1 << src[i] % BITS_PER_BITE);
+	return dest;
+}
+
+void print_set(set src) {
+	int count = 0, i = 0, j = 0;
+	for (; i < (MAX_NUM + BITS_PER_BITE - 1) / BITS_PER_BITE; i++)
+		for (; j < BITS_PER_BITE; j++)
+			if ((src.data[i] & (1 << j)) == (1 << j)) {
+				count++;
+				if (count % MAX_NUM_ROW != 1)
+					printf(", ");
+				printf("%d", BITS_PER_BITE * i + j);
+				if (count % MAX_NUM_ROW == 0)
+					printf("\n");
+			}
+	if (count == 0)
+		puts("The set is empty");
+}
+
+set union_set(set src1, set src2) {
+	set dest = emptySet;
+	int i = 0;
+	for (; i < (MAX_NUM + BITS_PER_BITE - 1) / BITS_PER_BITE; i++)
+		dest.data[i] = src1.data[i] | src2.data[i];
+	return dest;
+}
+
+set intersect_set(set src1, set src2) {
+	set dest = emptySet;
+	int i = 0;
+	for (; i < (MAX_NUM + BITS_PER_BITE - 1) / BITS_PER_BITE; i++)
+		dest.data[i] = src1.data[i] & src2.data[i];
+	return dest;
+}
+
+set sub_set(set src1, set src2) {
+	set dest = emptySet;
+	int i = 0;
+	for (; i < (MAX_NUM + BITS_PER_BITE - 1) / BITS_PER_BITE; i++)
+		dest.data[i] = src1.data[i] & (~(src1.data[i] & src2.data[i]));
+	return dest;
+}
+
 int str_trimmer(char *src) {
 	char *pnt = src;
 	int wordCount = 0, commasCount = 0;
@@ -188,3 +302,4 @@ void error(int errorCode) {
 		break;
 	}
 }
+
