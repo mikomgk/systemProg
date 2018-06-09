@@ -4,7 +4,7 @@
 #define ASCII_ENTRIES 256
 #define MAX_WORD_LENGTH 80
 
-void checkPermuntation(FILE *inFile, char *wordPermuntation);
+void checkPermutation(FILE *inFile, char *wordPermutation);
 
 int main(int argc, char *argv[]) {
     FILE *fp;
@@ -13,20 +13,22 @@ int main(int argc, char *argv[]) {
     else if (!(fp = fopen(argv[1], "r")))
         printf("ERROR: Can't open the file");
     else
-        checkPermuntation(fp, argv[2]);
+        checkPermutation(fp, argv[2]);
+    return 0;
 }
 
-void checkPermuntation(FILE *inFile, char *wordPermuntation) {
+void checkPermutation(FILE *inFile, char *wordPermutation) {
     int histogram[ASCII_ENTRIES] = {0}, isLetterExist[ASCII_ENTRIES] = {0},
-            permuntationLength = strlen(wordPermuntation), letterCount = permuntationLength, wordCount = 0, c, i;
-    char extractedLine[MAX_WORD_LENGTH], *startWord = extractedLine, *endWord = extractedLine + permuntationLength;
+            permutationLength = strlen(wordPermutation), letterCount = permutationLength, wordCount = 0, c, i, j;
+    char extractedLine[MAX_WORD_LENGTH + 1] = {0}, *startWord = extractedLine, *endWord;
     /*Set the histogram by the given string*/
-    for (char *pnt = wordPermuntation; *pnt; pnt++) {
+    char *pnt = wordPermutation;
+    for (; *pnt; pnt++) {
         histogram[*pnt]++;
         isLetterExist[*pnt] = 1;
     }
-    for (int i = permuntationLength; (c = getc(inFile)); i++) { /*insert the next char into the string*/
-        extractedLine[i % MAX_WORD_LENGTH]=c;
+    for (i = permutationLength; (c = getc(inFile)) != EOF; i++) { /*insert the next char into the string*/
+        extractedLine[i % MAX_WORD_LENGTH] = c;
         /*move the right end of the frame one step forward*/
         endWord = extractedLine + i % MAX_WORD_LENGTH;
 
@@ -40,15 +42,19 @@ void checkPermuntation(FILE *inFile, char *wordPermuntation) {
         startWord = (extractedLine + (((startWord - extractedLine) % MAX_WORD_LENGTH + 1) % MAX_WORD_LENGTH));
 
         if (letterCount == 0) {
-            for (i = 0; !histogram[i] && i < ASCII_ENTRIES; i++) /*checks number of occurrences of each letter*/
+            for (j = 0; !histogram[j] && j < ASCII_ENTRIES; j++) /*checks number of occurrences of each letter*/
                 ;
-            if (i == ASCII_ENTRIES) { /*there is a permutation*/
-                extractedLine[(i + 1) % MAX_WORD_LENGTH] = '\0';
-                puts(startWord);
+            if (j == ASCII_ENTRIES) { /*there is a permutation*/
+                extractedLine[(j + 1) % MAX_WORD_LENGTH] = '\0';
+                printf("%s", startWord);
+                if (startWord > extractedLine + MAX_WORD_LENGTH - permutationLength)
+                    printf("%s", extractedLine);
+                printf("\n");
                 wordCount++;
             }
         }
     }
-
+    if (wordCount == 0)
+        puts("There are no permutations in the file");
 }
 
