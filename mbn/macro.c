@@ -5,9 +5,9 @@
 #define round(a) (int)((a)+0.5)
 
 #define roundArr(a) do{\
-for(i=0;i<length((a));i++)\
-(a)[i]=round((a)[i]);\
-}while(0,0);
+    for(i=0;i<length((a));i++)\
+        (a)[i]=round((a)[i]);\
+    }while(0,0);
 
 #define printArr(a) do{\
     printf("%d",(int)(a)[0]);\
