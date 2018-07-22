@@ -1,9 +1,6 @@
 #ifndef ASSEMBLER_SETTINGS_H
 #define ASSEMBLER_SETTINGS_H
 
-#define WORD_SIZE 14
-#define NUMBER_SIZE 12
-
 char *addressing_13[] = {"1", "3"};
 char *addressing_013[] = {"0", "1", "3"};
 char *addressing_123[] = {"1", "2", "3"};
@@ -23,5 +20,6 @@ char *addressing_types[] = {"0", "1", "2", "3", NULL};
 char *addressing_types_code[] = {"..", "./", "/.", "//", NULL};
 char *are[] = {"A", "R", "E"};
 char *are_code[] = {"..", "/.", "./"};
+
 
 #endif //ASSEMBLER_SETTINGS_H

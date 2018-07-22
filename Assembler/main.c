@@ -2,32 +2,15 @@
 #include <string.h>
 #include <ctype.h>
 #include "settings.h"
+#include "tables.h"
 
 #define err_1 "ergfror fld fds"
 
 void *mapping(char *word, char *words[], void *params[]);
-
 int trim(char *word, int in_brackets);
-
 void dec2bin(int num, char *word);
 
 int main() {
-        char a[] = "      hjkdefhkf           kljhdfl                  ,       kdjskljskl ,dska", b[100] = {0},*c,*d;
-    trim(a, 0);
-    c = strtok(a, " ");
-    puts(a);
-    c=strtok(NULL,",");
-    puts(c);
-    c=strtok(NULL,",");
-    puts(c);
-
-    c=strtok(NULL,",");
-    puts(c);
-    c=strtok(NULL,",");
-    if(c==NULL)
-        puts("YES");
-    else
-        puts(c);
     return 0;
 }
 
