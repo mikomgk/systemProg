@@ -17,5 +17,6 @@ char* error_log_table_string[MAX_LINES];
 
 
 void clear_tables();
+void replace_line(enum tables table,int line,int int_data,char* string_data);
 
 #endif //ASSEMBLER_TABLE_H

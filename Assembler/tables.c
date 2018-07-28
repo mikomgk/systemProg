@@ -1,4 +1,3 @@
-#include <memory.h>
 #include "tables.h"
 
 void clear_tables() {
