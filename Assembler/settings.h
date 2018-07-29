@@ -21,5 +21,27 @@ char *addressing_types_code[] = {"..", "./", "/.", "//", NULL};
 char *are[] = {"A", "R", "E"};
 char *are_code[] = {"..", "/.", "./"};
 
+char *errors[]={
+        "e spaces between parameters",
+        "e missing comma",
+        "e too many commas",
+        "e comma not allowed",
+        "e missing quotation mark",
+        "e too many quotation marks",
+        "e wrong number of operators",
+        "e label name is not allowed",
+        "e label name is already in use",
+        "e label name is a saved word",
+        "e expected \':\' after label name",
+        "e label name is not exist",
+        "e wrong operation name",
+        "e addressing mode is not compatible with the given operation",
+        "e register is not exist",
+        "e missing operation name"
+};
+
+char *alerts[]={
+        "a label before .extern or .entry line is meaningless"
+};
 
 #endif //ASSEMBLER_SETTINGS_H

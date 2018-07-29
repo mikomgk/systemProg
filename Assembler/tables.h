@@ -12,11 +12,13 @@ char data_table_string[MAX_LINES][WORD_SIZE];
 char symbol_table_label[MAX_LINES][LABEL_SIZE];
 int symbol_table_address[MAX_LINES];
 
-int error_log_table_data_line[MAX_LINES];
-char* error_log_table_string[MAX_LINES];
+int error_table_data_line_number[MAX_LINES];
+char* error_table_error_string[MAX_LINES];
+char error_table_data_line[MAX_LINES][LINE_SIZE];
 
 
 void clear_tables();
-void replace_line(enum tables table,int line,int int_data,char* string_data);
+void replace_line(enum tables table, int int_data, char *string_data, char *string_data2);
+int is_label_exist(char *label);
 
 #endif //ASSEMBLER_TABLE_H
