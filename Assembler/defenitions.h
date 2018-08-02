@@ -10,6 +10,10 @@
 #define MAX_LINES 100
 #define IC instructions_table_line[0]
 #define DC data_table_line[0]
+#define DATA "data"
+#define STRING "string"
+#define ENTRY "entry"
+#define EXTERN "extern"
 
 #define ERR_SPACE_BETWEEN_PARAMS errors[0]
 #define ERR_MISSING_COMMA errors[1]
@@ -27,10 +31,11 @@
 #define ERR_ADDRESSING_MODE_IS_NOT_COMPATIBLE errors[013]
 #define ERR_REGISTER_NOT_EXIST errors[14]
 #define ERR_MISSING_OPERATION_NAME errors[15]
+#define ERR_INVALID_INTEGER errors[16]
 #define ALERT_LABEL_MEANINGLESS alerts[1]
 
 enum tables {
-    INSTRUCTIONS, DATA, SYMBOL, ERROR
+    INSTRUCTIONS_T, DATA_T, SYMBOL_T, ERROR_T
 };
 
 #endif //ASSEMBLER_DEFENITIONS_H

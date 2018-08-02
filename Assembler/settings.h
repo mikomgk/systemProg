@@ -21,6 +21,9 @@ char *addressing_types_code[] = {"..", "./", "/.", "//", NULL};
 char *are[] = {"A", "R", "E"};
 char *are_code[] = {"..", "/.", "./"};
 
+char *directives[]={"data","string","extern","entry"};
+
+
 char *errors[]={
         "e spaces between parameters",
         "e missing comma",
@@ -37,7 +40,8 @@ char *errors[]={
         "e wrong operation name",
         "e addressing mode is not compatible with the given operation",
         "e register is not exist",
-        "e missing operation name"
+        "e missing operation name",
+        "e invalid integer"
 };
 
 char *alerts[]={
