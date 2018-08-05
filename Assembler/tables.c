@@ -20,13 +20,13 @@ void replace_line(enum tables table, int int_data, char *string_data, char *stri
     switch (table) {
         case INSTRUCTIONS_T:
             line = instructions_table_line[0] + 1;
-            instructions_table_line[line] = int_data;
+            instructions_table_line[line] = line-1;
             strcpy(instructions_table_string[line], string_data);
             instructions_table_line[0]++;
             break;
         case DATA_T:
             line = data_table_line[0] + 1;
-            data_table_line[line] = int_data;
+            data_table_line[line] = line-1;
             strcpy(data_table_string[line], string_data);
             data_table_line[0]++;
             break;

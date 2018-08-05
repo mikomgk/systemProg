@@ -21,7 +21,8 @@ char *addressing_types_code[] = {"..", "./", "/.", "//", NULL};
 char *are[] = {"A", "R", "E"};
 char *are_code[] = {"..", "/.", "./"};
 
-char *directives[]={"data","string","extern","entry"};
+char *directives[]={"data","string","extern","entry",NULL};
+char *directives_number[]={"1","2","3","4",NULL};
 
 
 char *errors[]={
@@ -41,7 +42,8 @@ char *errors[]={
         "e addressing mode is not compatible with the given operation",
         "e register is not exist",
         "e missing operation name",
-        "e invalid integer"
+        "e invalid integer",
+        "e label name is too long"
 };
 
 char *alerts[]={
