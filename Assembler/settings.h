@@ -45,7 +45,8 @@ char *errors[]={
         "ERROR: invalid integer",
         "ERROR: label name is too long",
         "ERROR: can't open file",
-        "ERROR: not an assembley file"
+        "ERROR: not an assembley file",
+        "ERROR: number is too big"
 };
 
 char *alerts[]={

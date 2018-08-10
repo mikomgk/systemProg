@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <stdlib.h>
+#include <math.h>
 #include "settings.h"
 #include "tables.h"
 
@@ -16,15 +17,18 @@ void write_parameter_binary_word(char *binary_word, char *operand, int operand_t
 void reset_binary_word(char *binary_word);
 FILE *new_file(char *file_name, char *file_extention, char *new_extention);
 void insert_error_message(int LC, char *error_message, char *line);
+int biggest_number(int num_of_binary_digits);
 
-int error_flag;
+int error_flag,biggest_long_number,biggest_short_number;
 
 int main(int argc, char *argv[]) {
     FILE *fp, *n_file;
     char line[LINE_SIZE], line_copy[LINE_SIZE], *label = NULL, *operation = NULL, *operandA = NULL, *operandB = NULL, binary_word[WORD_SIZE], *tmp, *operandA_type,
             *operandB_type, **addressin_options, *parameterA, *parameterB, file_name[FILENAME_MAX], *file_extention;
-    int LC, has_label_flag, label_exist_flag, label_ok_flag, addressing_type_2_flag, number, number_of_extra_words, number_of_operators, number_of_registers, i;
-    extern int error_flag;
+    int LC, has_label_flag, label_exist_flag, label_ok_flag, addressing_type_2_flag, number_of_extra_words, number_of_operators, number_of_registers, i;
+    long number;
+    extern int error_fla,biggest_long_number,biggest_short_number;
+    biggest_long_number=biggest_number(WORD_SIZE),biggest_short_number=biggest_number(NUMBER_SIZE)
     if (argc == 1)
         return 0;
     while (--argc > 0) {
@@ -77,16 +81,18 @@ int main(int argc, char *argv[]) {
                             insert_error_message(line, LC, ERR_WRONG_NUMBER_OF_OPERATORS);
                         } else
                             for (operandA = strtok(operandA, ","); *operandA; operandA = strtok(NULL, ",")) {
-                                //TODO: too big number
-                                number = (int) strtol(operandA, &operandB, 10);
+                                number = strtol(operandA, &operandB, 10);
                                 //not an int
                                 if (operandB) {
                                     insert_error_message(LC, ERR_INVALID_INTEGER, line);
                                     break;
-                                } else {
-                                    //enter binary number
+                                } else if(number>biggest_long_number) {
+                                    insert_error_message(LC,ERR_NUMBER_IS_TOO_BIG,line);
+                                }else {
+                                        //enter binary number
                                     dec2bin(number, binary_word, WORD_SIZE);
                                     replace_line(DATA_T, 0, binary_word, NULL);
+                                    }
                                 }
                             }
                     } else if (!strcmp((operation + 1), STRING)) {
@@ -264,10 +270,13 @@ void write_parameter_binary_word(char *binary_word, char *operand, int operand_t
     }
     switch (operand_type) {
         case 0:
-            //TODO: too big integer
-            number = (int) strtol(operand + 1, &tmp, 10);
+            number = strtol(operand + 1, &tmp, 10);
             if (tmp) {
-                //TODO: is not an int
+                insert_error_message(LC, ERR_INVALID_INTEGER, line);
+                return;
+            }
+            if(number>biggest_short_number) {
+                insert_error_message(LC, ERR_NUMBER_IS_TOO_BIG, line);
                 return;
             }
             dec2bin(number, binary_word, NUMBER_SIZE);
@@ -295,7 +304,9 @@ void write_operand_addressing(char *operation, char *operand, char *binary_word,
         //correct addressing type
         if ((tmp = (char *) mapping(operand_type, addressing_types, addressing_types_code)))
             strcpy(binary_word + operandBinaryIndex, tmp);
-    }
+    }else
+        //wrong addressing type
+        insert_error_message(LC,ERR_ADDRESSING_MODE_IS_NOT_COMPATIBLE,line);
 }
 
 int parser(char *line, char *label, char *operation, char *operandA, char *operandB, int line_counter, char *original_line, int *number_of_operators) {
@@ -452,4 +463,11 @@ char *get_addressing_type(char *operand, int *number_of_registers) {
         if (*operand == '(')
             return JUMPING_ADDRESSING;
     return LABEL_ADDRESSING;
+}
+
+int biggest_number(int num_of_binary_digits){
+    int i=0,sum=0;
+    for(;i<num_of_binary_digits;i++)
+        sum+=pow(2,i);
+    return sum;
 }
