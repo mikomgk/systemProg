@@ -51,7 +51,7 @@ void write_table_to_file(FILE *f,enum files file_type) {
     int i;
     switch (file_type) {
         case OBJECT_F:
-            update_words_addresses(0, BEGINING_ADDRESS);
+            update_words_addresses(0, BEGINNING_ADDRESS);
             fprintf(f, "%d %d", instructions_table_address[0], data_table_address[0]);
             for (i = 1; i <= instructions_table_address[0]; i++) {
                 fprintf(f, "\n%.4d\t%s", instructions_table_address[i], instructions_table_word[i]);

@@ -5,51 +5,51 @@
 
 void *mapping(char *word, char *words[], void *params[]);
 int trim(char *word, int in_brackets);
-void dec2bin(int num, char *word,int size_of_word);
-int parser(char *line, char *label, char *operation, char *operandA, char *operandB, int line_counter, char *original_line,int *number_of_operators);
-int is_label_ok(char* label,int line_counter,char *original_line);
+void dec2bin(int num, char *binary_word, int size_of_word);
+int parser(char *line, char *label, char *operation, char *operandA, char *operandB, int line_counter, char *original_line, int *number_of_operators);
+int is_label_ok(char *label, int line_counter, char *original_line);
 int is_string_ok(char *string);
-char* get_addressing_type(char *operand, int *number_of_registers);
+char *get_addressing_type(char *operand, int *number_of_registers);
 void write_operand_addressing(char *operation, char *operand, char *binary_word, char *tmp, int operandBinaryIndex, int *number_of_registers, int
 *addressing_type_2_flag);
-void write_parameter_binary_word(char *binary_word, char *operand, int operand_type,char *option_operandB,int is_destination_operand);
-void reset_word(char *binary_word);
-FILE *new_file(char *file_name, char* file_extention,char *new_extention);
+void write_parameter_binary_word(char *binary_word, char *operand, int operand_type, char *option_operandB, int is_destination_operand);
+void reset_binary_word(char *binary_word);
+FILE *new_file(char *file_name, char *file_extention, char *new_extention);
+void insert_error_message(int LC, char *error_message, char *line);
 
+int error_flag;
 
 int main(int argc, char *argv[]) {
-    FILE *fp,*n_file;
-    char line[LINE_SIZE], line_copy[LINE_SIZE], *label = NULL, *operation = NULL, *operandA = NULL, *operandB = NULL,long_number_string[WORD_SIZE],
-            short_number_string[NUMBER_SIZE],binary_word[WORD_SIZE],*tmp,*operandA_type,*operandB_type,**addressin_options,*parameterA,*parameterB,file_name[FILENAME_MAX],
-            *file_extention;
-    int LC, error_flag, has_label_flag,label_exist_flag,label_ok_flag,number,number_of_extra_words,number_of_operators,number_of_registers,
-            addressing_type_2_flag,i;
+    FILE *fp, *n_file;
+    char line[LINE_SIZE], line_copy[LINE_SIZE], *label = NULL, *operation = NULL, *operandA = NULL, *operandB = NULL, binary_word[WORD_SIZE], *tmp, *operandA_type,
+            *operandB_type, **addressin_options, *parameterA, *parameterB, file_name[FILENAME_MAX], *file_extention;
+    int LC, has_label_flag, label_exist_flag, label_ok_flag, addressing_type_2_flag, number, number_of_extra_words, number_of_operators, number_of_registers, i;
+    extern int error_flag;
     if (argc == 1)
         return 0;
     while (--argc > 0) {
-        strcpy(file_name,argv[0]);
-        if((file_extention=strchr(file_name,'.'))==NULL||strcmp(file_extention,ASSEMBLEY_EXTENTION)) {
+        strcpy(file_name, argv[0]);
+        if ((file_extention = strchr(file_name, '.')) == NULL || strcmp(file_extention, ASSEMBLEY_EXTENTION)) {
             //not an assembley file
-            replace_line(ERROR_T, 0, ERR_NOT_AN_ASSEMBLEY_FILE, NULL);
-            error_flag = 1;
+            insert_error_message(0, ERR_NOT_AN_ASSEMBLEY_FILE, NULL);
         }
-        clear_tables();
-        error_flag = 0;
-        has_label_flag=0;
-        label_exist_flag=0;
         if ((fp = fopen(*++argv, "r")) == NULL) {
             //file not open
-            replace_line(ERROR_T, 0, ERR_CAN_NOT_OPEN_FILE, NULL);
-            error_flag = 1;
+            insert_error_message(0, ERR_CAN_NOT_OPEN_FILE, NULL);
         } else {
             //file open
             LC = 0;
+            clear_tables();
+            error_flag = 0;
             //get next line
             while (fgets(line, LINE_SIZE, fp)) {
                 LC++;
                 number_of_extra_words = 0;
                 number_of_operators = 0;
                 addressing_type_2_flag = 0;
+                has_label_flag = 0;
+                label_exist_flag = 0;
+                reset_binary_word(binary_word);
                 strcpy(line_copy, line);
                 trim(line_copy, 0);
                 //empty line or comment line
@@ -63,11 +63,10 @@ int main(int argc, char *argv[]) {
                     //TODO: has a label
                 }
                 //label already exist
-                if (!(label_ok_flag = is_label_ok(label, LC, line))) {
-                    error_flag = 1;
-                } else if ((label_exist_flag = has_label_flag ? is_label_exist(label) : 0))
-                    replace_line(ERROR_T, LC, ERR_LABEL_NAME_ALREADY_IN_USE, line);
-                error_flag = 1;
+                label_ok_flag = is_label_ok(label, LC, line);
+                if ((label_exist_flag = has_label_flag ? is_label_exist(label) : 0)) {
+                    insert_error_message(LC, ERR_LABEL_NAME_ALREADY_IN_USE, line);
+                }
                 //directive line
                 if (*operation == '.') {
                     if (!strcmp((operation + 1), DATA)) {
@@ -75,22 +74,19 @@ int main(int argc, char *argv[]) {
                             replace_line(SYMBOL_T, DC, label, DATA);
                         //too many operands
                         if (operandB) {
-                            replace_line(ERROR_T, LC, ERR_WRONG_NUMBER_OF_OPERATORS, line);
-                            error_flag = 1;
-                            operandB = NULL;
+                            insert_error_message(line, LC, ERR_WRONG_NUMBER_OF_OPERATORS);
                         } else
                             for (operandA = strtok(operandA, ","); *operandA; operandA = strtok(NULL, ",")) {
                                 //TODO: too big number
-                                number = (int) strtol(operandA, operandB, 10);
+                                number = (int) strtol(operandA, &operandB, 10);
                                 //not an int
                                 if (operandB) {
-                                    replace_line(ERROR_T, LC, ERR_INVALID_INTEGER, line);
-                                    error_flag = 1;
+                                    insert_error_message(LC, ERR_INVALID_INTEGER, line);
                                     break;
                                 } else {
                                     //enter binary number
-                                    dec2bin(number, long_number_string, WORD_SIZE);
-                                    replace_line(DATA_T, 0, long_number_string, NULL);
+                                    dec2bin(number, binary_word, WORD_SIZE);
+                                    replace_line(DATA_T, 0, binary_word, NULL);
                                 }
                             }
                     } else if (!strcmp((operation + 1), STRING)) {
@@ -98,16 +94,14 @@ int main(int argc, char *argv[]) {
                             replace_line(SYMBOL_T, DC, label, DATA);
                         //too many operands
                         if (operandB) {
-                            replace_line(ERROR_T, LC, ERR_WRONG_NUMBER_OF_OPERATORS, line);
-                            error_flag = 1;
-                            operandB = NULL;
+                            insert_error_message(line, LC, ERR_WRONG_NUMBER_OF_OPERATORS);
                         } else if (!is_string_ok(operandA)) {
-                            replace_line(ERROR_T, LC, ERR_MISSING_QUOTATION_MARK, line);
-                            error_flag = 1;
+                            insert_error_message(LC, ERR_MISSING_QUOTATION_MARK, line);
                         } else
-                            for (operandA++; *operandA; operandA++) {
-                                dec2bin(*operandA, long_number_string, WORD_SIZE);
-                                replace_line(DATA_T, 0, long_number_string, NULL);
+                            //ignoring quotation marks
+                            for (operandA++; *(operandA + 1); operandA++) {
+                                dec2bin(*operandA, binary_word, WORD_SIZE);
+                                replace_line(DATA_T, 0, binary_word, NULL);
                             }
                     } else if (!strcmp((operation + 1), ENTRY)) {
                         if (has_label_flag)
@@ -116,21 +110,17 @@ int main(int argc, char *argv[]) {
                         if (has_label_flag)
                             replace_line(ERROR_T, LC, ALERT_LABEL_MEANINGLESS, line);
                         if (operandB) {
-                            replace_line(ERROR_T, LC, ERR_WRONG_NUMBER_OF_OPERATORS, line);
-                            error_flag = 1;
-                            operandB = NULL;
+                            insert_error_message(line, LC, ERR_WRONG_NUMBER_OF_OPERATORS);
                         } else if (!is_label_ok(operandA, LC, line)) {
                             error_flag = 1;
                         } else if (is_label_exist(operandA)) {
                             //label already exist
-                            replace_line(ERROR_T, LC, ERR_LABEL_NAME_ALREADY_IN_USE, line);
-                            error_flag = 1;
+                            insert_error_message(LC, ERR_LABEL_NAME_ALREADY_IN_USE, line);
                         } else {
                             replace_line(SYMBOL_T, 0, operandA, EXTERN);
                         }
                     } else {
-                        replace_line(ERROR_T, LC, ERR_WRONG_OPERATION_NAME, line);
-                        error_flag = 1;
+                        insert_error_message(LC, ERR_WRONG_OPERATION_NAME, line);
                     }
                 } else {
                     if (label_ok_flag && !label_exist_flag)
@@ -140,29 +130,23 @@ int main(int argc, char *argv[]) {
                         strcpy(binary_word + 4, tmp);
                     else {
                         //wrong operation name
-                        replace_line(ERROR_T, LC, ERR_WRONG_OPERATION_NAME, line);
-                        error_flag = 1;
+                        insert_error_message(LC, ERR_WRONG_OPERATION_NAME, line);
                         continue;
                     }
-                    strcpy(binary_word + ARE_INDEX, "..");
                     switch (atoi((char *) mapping(operation, op_names, num_of_operands_per_op))) {
                         //wrong number of operators
                         case 0:
                             if (operandA) {
-                                replace_line(ERROR_T, LC, ERR_WRONG_NUMBER_OF_OPERATORS, line);
-                                error_flag = 1;
+                                insert_error_message(LC, ERR_WRONG_NUMBER_OF_OPERATORS, line);
                                 number_of_operators = -1;
                             } else {
                                 number_of_operators = 0;
-                                strcpy(binary_word + SOURCE_OPERAND_ADDRESSING_INDEX, "....");
-                                strcpy(binary_word, "....");
-                                replace_line(INSTRUCTIONS_T,NULL,binary_word,NULL);
+                                replace_line(INSTRUCTIONS_T, NULL, binary_word, NULL);
                             }
                             break;
                         case 1:
                             if (operandB) {
-                                replace_line(ERROR_T, LC, ERR_WRONG_NUMBER_OF_OPERATORS, line);
-                                error_flag = 1;
+                                insert_error_message(LC, ERR_WRONG_NUMBER_OF_OPERATORS, line);
                                 number_of_operators = -1;
                             } else
                                 number_of_operators = 1;
@@ -186,18 +170,17 @@ int main(int argc, char *argv[]) {
                             write_operand_addressing(NULL, parameterB, binary_word, tmp, 2, &number_of_registers, NULL);
                             number_of_extra_words++;
                         } else
-                            strcpy(binary_word, "....");
-                        replace_line(INSTRUCTIONS_T, NULL, binary_word, NULL);
+                            replace_line(INSTRUCTIONS_T, NULL, binary_word, NULL);
                         number_of_extra_words = number_of_extra_words + number_of_operators - (number_of_registers == 2 ? 1 : 0);
                         IC += number_of_extra_words;
                     }
                 }
             }
             //if there is no error
-            if(!error_flag){
-                update_words_addresses(1,IC);
-                fseek(fp,0,SEEK_SET);
-                IC=0;
+            if (!error_flag) {
+                update_words_addresses(1, IC);
+                fseek(fp, 0, SEEK_SET);
+                IC = 0;
                 //second round
                 while (fgets(line, LINE_SIZE, fp)) {
                     number_of_registers = 0;
@@ -222,52 +205,58 @@ int main(int argc, char *argv[]) {
                     //increase IC to effect the extra word and not the instruction word
                     IC++;
                     //writes extra words
-                    for(i=1;i<=number_of_operators;i++) {
-                        int is_first_operator=i==1;
-                        int is_source_operand=number_of_operators==2&&is_first_operator;
+                    for (i = 1; i <= number_of_operators; i++) {
+                        int is_first_operator = i == 1;
+                        int is_source_operand = number_of_operators == 2 && is_first_operator;
                         if (number_of_registers == 2) {
                             write_parameter_binary_word(binary_word, operandA, operandA_type, operandB, 0);
                             i++;
                         }
-                        write_parameter_binary_word(binary_word,is_first_operator?operandA:operandB,atoi(is_first_operator?operandA_type:operandB_type),NULL,
-                                                    is_source_operand?0:1);
-                        replace_line(INSTRUCTIONS_T,NULL,binary_word,NULL);
+                        write_parameter_binary_word(binary_word, is_first_operator ? operandA : operandB, atoi(is_first_operator ? operandA_type : operandB_type), NULL,
+                                                    is_source_operand ? 0 : 1);
+                        replace_line(INSTRUCTIONS_T, NULL, binary_word, NULL);
                     }
                 }
             }
             fclose(fp);
         }
-        if(error_flag) {
+        if (error_flag) {
             //writes errors to stderr
             write_errors(*argv);
-        }else{
+        } else {
             //create and write files
-            n_file=new_file(file_name,file_extention,OBJECT_EXTENTION);
-            write_table_to_file(n_file,OBJECT_F);
-            n_file=new_file(file_name,file_extention,ENTRY_EXTENTION);
-            write_table_to_file(n_file,ENTRY_F);
-            n_file=new_file(file_name,file_extention,EXTERN_EXTENTION);
-            write_table_to_file(n_file,EXTERN_F);
+            n_file = new_file(file_name, file_extention, OBJECT_EXTENTION);
+            write_table_to_file(n_file, OBJECT_F);
+            n_file = new_file(file_name, file_extention, ENTRY_EXTENTION);
+            write_table_to_file(n_file, ENTRY_F);
+            n_file = new_file(file_name, file_extention, EXTERN_EXTENTION);
+            write_table_to_file(n_file, EXTERN_F);
         }
     }
     return 0;
 }
 
-FILE *new_file(char *file_name, char* file_extention,char *new_extention){
-    strcpy(file_extention,new_extention);
-    return fopen(file_name,"w");
+void insert_error_message(int LC, char *error_message, char *line) {
+    extern int error_flag;
+    replace_line(ERROR_T, LC, error_message, line);
+    error_flag = 1;
 }
 
-void reset_word(char *binary_word){
-    int i=0;
-    for(;i<WORD_SIZE;i++)
-        *binary_word++='.';
+FILE *new_file(char *file_name, char *file_extention, char *new_extention) {
+    strcpy(file_extention, new_extention);
+    return fopen(file_name, "w");
 }
 
-void write_parameter_binary_word(char *binary_word, char *operand, int operand_type,char *option_operandB,int is_destination_operand) {
+void reset_binary_word(char *binary_word) {
+    int i = 0;
+    for (; i < WORD_SIZE; i++)
+        *binary_word++ = '.';
+}
+
+void write_parameter_binary_word(char *binary_word, char *operand, int operand_type, char *option_operandB, int is_destination_operand) {
     int number;
     char *tmp = NULL;
-    reset_word(binary_word);
+    reset_binary_word(binary_word);
     if (option_operandB) {
         strcpy(binary_word, mapping(operand, register_names, register_code));
         strcpy(binary_word + DESTINATION_REGISTER_INDEX, mapping(option_operandB, register_names, register_code));
@@ -285,7 +274,10 @@ void write_parameter_binary_word(char *binary_word, char *operand, int operand_t
             break;
         case 1:
             number = get_symbol_address(operand);
-            dec2bin(number, binary_word, NUMBER_SIZE);
+            if (number == -1)
+                insert_error_message(LC, ERR_LABEL_NAME_IS_NOT_EXIST, line);
+            else
+                dec2bin(number, binary_word, NUMBER_SIZE);
             break;
         case 3:
             strcpy(binary_word + (is_destination_operand ? DESTINATION_REGISTER_INDEX : 0), mapping(operand, register_names, register_code));
@@ -306,7 +298,7 @@ void write_operand_addressing(char *operation, char *operand, char *binary_word,
     }
 }
 
-int parser(char *line, char *label, char *operation, char *operandA, char *operandB, int line_counter, char *original_line,int *number_of_operators) {
+int parser(char *line, char *label, char *operation, char *operandA, char *operandB, int line_counter, char *original_line, int *number_of_operators) {
     int is_label = 1, count_spaces = 0;
     char *pnt = line, *tmp = NULL;
     label = NULL;
@@ -344,7 +336,7 @@ int parser(char *line, char *label, char *operation, char *operandA, char *opera
     if (tmp) {
         replace_line(ERROR_T, line_counter, ERR_WRONG_NUMBER_OF_OPERATORS, original_line);
         is_label *= is_label > 0 ? -1 : 1;
-        *number_of_operators=-1;
+        *number_of_operators = -1;
     }
     return is_label;
 }
@@ -396,20 +388,20 @@ int trim(char *word, int in_brackets) {
     return trimmed_flag;
 }
 
-void dec2bin(int num, char *word,int size_of_word) {
+void dec2bin(int num, char *binary_word, int size_of_word) {
     int mask = 1, i;
     for (i = size_of_word - 1; i >= 0; i--, mask <<= 1)
         if (num & mask)
-            word[i] = '/';
+            binary_word[i] = '/';
         else
-            word[i] = '.';
+            binary_word[i] = '.';
 }
 
-int is_label_ok(char* label,int line_counter,char *original_line) {
+int is_label_ok(char *label, int line_counter, char *original_line) {
     int error = 0;
     char *pnt = label;
     if (strlen(pnt) > LABEL_SIZE + 1) {
-        replace_line(ERROR_T, line_counter, ERR_LABEL_NAME_IS_TOO_LONG, original_line);
+        insert_error_message(line_counter, ERR_LABEL_NAME_IS_TOO_LONG, original_line);
         error = 1;
     }
     if (!isalpha(*pnt++))
@@ -418,46 +410,46 @@ int is_label_ok(char* label,int line_counter,char *original_line) {
         if (!isalnum(*pnt))
             error = 2;
     }
-    if (*--label != ':')
+    if (error == 2)
+        insert_error_message(line_counter, ERR_LABEL_NAME_IS_NOT_ALLOWED, original_line);
+    if (*--label != ':') {
+        insert_error_message(line_counter,ERR_MISSING_COLON_AFTER_LABEL,original_line);
         error = 2;
+    }
     else
         *pnt == '\0';
-    if (error == 2)
-        replace_line(ERROR_T, line_counter, ERR_LABEL_NAME_IS_NOT_ALLOWED, original_line);
     if (mapping(label, op_names, op_code))
-        error = 3;
+        error = 4;
     if (mapping(label, register_names, register_code))
-        error = 3;
+        error = 4;
     if (mapping(label, directives, directives_number))
-        error = 3;
-    if (error == 3)
-        replace_line(ERROR_T, line_counter, ERR_LABEL_NAME_IS_SAVED_WORD, original_line);
+        error = 4;
+    if (error == 4)
+        insert_error_message(line_counter, ERR_LABEL_NAME_IS_SAVED_WORD, original_line);
     return error ? 0 : 1;
 }
 
 int is_string_ok(char *string) {
-    int is_ok = 1;
     if (*string != '\"')
-        is_ok = 0;
+        return 0;
     for (; *string; string++)
         /**/;
     if (*--string != '\"')
-        is_ok = 0;
-    *string = '\0';
-    return is_ok;
+        return 0;
+    return 1;
 }
 
-char* get_addressing_type(char *operand, int *number_of_registers) {
+char *get_addressing_type(char *operand, int *number_of_registers) {
     if (!operand)
         return NULL;
     if (*operand == '#')
-        return addressing_types[0];
+        return IMMEDIATE_ADDRESSING;
     if (mapping(operand, register_names, register_names)) {
         *number_of_registers++;
-        return addressing_types[3];
+        return REGISTER_ADDRESSING;
     }
     for (; *operand; operand++)
         if (*operand == '(')
-            return addressing_types[2];
-    return addressing_types[1];
+            return JUMPING_ADDRESSING;
+    return LABEL_ADDRESSING;
 }

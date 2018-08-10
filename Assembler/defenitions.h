@@ -10,7 +10,7 @@
 #define SYMBOL_TYPE_SIZE 8
 #define LINE_SIZE 80
 #define MAX_LINES 100
-#define BEGINING_ADDRESS 100
+#define BEGINNING_ADDRESS 100
 #define SOURCE_OPERAND_ADDRESSING_INDEX 8
 #define DESTINATION_OPERAND_ADDRESSING_INDEX 10
 #define DESTINATION_REGISTER_INDEX 6
@@ -23,6 +23,10 @@
 #define OPERATION "operation"
 #define ENTRY "entry"
 #define EXTERN "extern"
+#define IMMEDIATE_ADDRESSING addressing_types[0]
+#define REGISTER_ADDRESSING addressing_types[3]
+#define JUMPING_ADDRESSING addressing_types[2]
+#define LABEL_ADDRESSING addressing_types[1]
 #define ASSEMBLEY_EXTENTION ".as"
 #define OBJECT_EXTENTION ".ob"
 #define ENTRY_EXTENTION ".ent"
@@ -33,7 +37,7 @@
 #define ERR_TOO_MANY_COMMAS errors[2]
 #define ERR_COMMA_NOT_ALLOWED errors[3]
 #define ERR_MISSING_QUOTATION_MARK errors[4]
-#define ERR_TOO_MANY_QU errors[5]
+#define ERR_TOO_MANY_QUOTATION_MARKS errors[5]
 #define ERR_WRONG_NUMBER_OF_OPERATORS errors[6]
 #define ERR_LABEL_NAME_IS_NOT_ALLOWED errors[7]
 #define ERR_LABEL_NAME_ALREADY_IN_USE errors[8]
@@ -41,7 +45,7 @@
 #define ERR_MISSING_COLON_AFTER_LABEL errors[10]
 #define ERR_LABEL_NAME_IS_NOT_EXIST errors[11]
 #define ERR_WRONG_OPERATION_NAME errors[12]
-#define ERR_ADDRESSING_MODE_IS_NOT_COMPATIBLE errors[013]
+#define ERR_ADDRESSING_MODE_IS_NOT_COMPATIBLE errors[13]
 #define ERR_REGISTER_NOT_EXIST errors[14]
 #define ERR_MISSING_OPERATION_NAME errors[15]
 #define ERR_INVALID_INTEGER errors[16]
