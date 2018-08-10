@@ -1,20 +1,32 @@
 #ifndef ASSEMBLER_DEFENITIONS_H
 #define ASSEMBLER_DEFENITIONS_H
 
+#include <stdio.h>
 #include <string.h>
 
 #define WORD_SIZE 14
 #define NUMBER_SIZE 12
 #define LABEL_SIZE 31
+#define SYMBOL_TYPE_SIZE 8
 #define LINE_SIZE 80
 #define MAX_LINES 100
-#define IC instructions_table_line[0]
-#define DC data_table_line[0]
+#define BEGINING_ADDRESS 100
+#define SOURCE_OPERAND_ADDRESSING_INDEX 8
+#define DESTINATION_OPERAND_ADDRESSING_INDEX 10
+#define DESTINATION_REGISTER_INDEX 6
+#define ARE_INDEX 12
+#define IC instructions_table_address[0]
+#define DC data_table_address[0]
+#define SC symbol_table_address[0]
 #define DATA "data"
 #define STRING "string"
 #define OPERATION "operation"
 #define ENTRY "entry"
 #define EXTERN "extern"
+#define ASSEMBLEY_EXTENTION ".as"
+#define OBJECT_EXTENTION ".ob"
+#define ENTRY_EXTENTION ".ent"
+#define EXTERN_EXTENTION ".ext"
 
 #define ERR_SPACE_BETWEEN_PARAMS errors[0]
 #define ERR_MISSING_COMMA errors[1]
@@ -34,11 +46,17 @@
 #define ERR_MISSING_OPERATION_NAME errors[15]
 #define ERR_INVALID_INTEGER errors[16]
 #define ERR_LABEL_NAME_IS_TOO_LONG errors[17]
+#define ERR_CAN_NOT_OPEN_FILE errors[18]
+#define ERR_NOT_AN_ASSEMBLEY_FILE errors[19]
 #define ALERT_LABEL_MEANINGLESS alerts[1]
 //TODO: number is too big
 
 enum tables {
     INSTRUCTIONS_T, DATA_T, SYMBOL_T, ERROR_T
+};
+
+enum files{
+    OBJECT_F,EXTERN_F,ENTRY_F
 };
 
 #endif //ASSEMBLER_DEFENITIONS_H

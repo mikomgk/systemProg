@@ -15,7 +15,7 @@ char **dest_operand_addressing_types_per_op[] = {addressing_13, addressing_013, 
 char **src_operand_addressing_types_per_op[] = {addressing_013, addressing_013, addressing_013, addressing_013, NULL, NULL, addressing_1, NULL, NULL, NULL,
                                                 NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 char *register_names[] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", NULL};
-char *register_code[] = {"......", "...../", "..../.", "....//", ".../..", "..././", "...//.", "...///", NULL};
+char *register_code[] = {"......", "...../ERROR:", "..../.", "....//", ".../..", "..././", "...//.", "...///", NULL};
 char *addressing_types[] = {"0", "1", "2", "3", NULL};
 char *addressing_types_code[] = {"..", "./", "/.", "//", NULL};
 char *are[] = {"A", "R", "E"};
@@ -26,28 +26,30 @@ char *directives_number[]={"1","2","3","4",NULL};
 
 
 char *errors[]={
-        "e spaces between parameters",
-        "e missing comma",
-        "e too many commas",
-        "e comma not allowed",
-        "e missing quotation mark",
-        "e too many quotation marks",
-        "e wrong number of operators",
-        "e label name is not allowed",
-        "e label name is already in use",
-        "e label name is a saved word",
-        "e expected \':\' after label name",
-        "e label name is not exist",
-        "e wrong operation name",
-        "e addressing mode is not compatible with the given operation",
-        "e register is not exist",
-        "e missing operation name",
-        "e invalid integer",
-        "e label name is too long"
+        "ERROR: spaces between parameters",
+        "ERROR: missing comma",
+        "ERROR: too many commas",
+        "ERROR: comma not allowed",
+        "ERROR: missing quotation mark",
+        "ERROR: too many quotation marks",
+        "ERROR: wrong number of operators",
+        "ERROR: label name is not allowed",
+        "ERROR: label name is already in use",
+        "ERROR: label name is a saved word",
+        "ERROR: expected \':\' after label name",
+        "ERROR: label name is not exist",
+        "ERROR: wrong operation name",
+        "ERROR: addressing mode is not compatible with the given operation",
+        "ERROR: register is not exist",
+        "ERROR: missing operation name",
+        "ERROR: invalid integer",
+        "ERROR: label name is too long",
+        "ERROR: can't open file",
+        "ERROR: not an assembley file"
 };
 
 char *alerts[]={
-        "a label before .extern or .entry line is meaningless"
+        "ALERT: label before .extern or .entry line is meaningless"
 };
 
 #endif //ASSEMBLER_SETTINGS_H
