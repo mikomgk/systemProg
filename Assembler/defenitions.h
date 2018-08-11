@@ -11,10 +11,14 @@
 #define LINE_SIZE 80
 #define MAX_LINES 100
 #define BEGINNING_ADDRESS 100
+#define PARAMETER1_INDEX 0
+#define PARAMETER2_INDEX 2
+#define OPERATION_CODE_INDEX 4
 #define SOURCE_OPERAND_ADDRESSING_INDEX 8
 #define DESTINATION_OPERAND_ADDRESSING_INDEX 10
-#define DESTINATION_REGISTER_INDEX 6
 #define ARE_INDEX 12
+#define SOURCE_REGISTER_INDEX 0
+#define DESTINATION_REGISTER_INDEX 6
 #define IC instructions_table_address[0]
 #define DC data_table_address[0]
 #define SC symbol_table_address[0]
@@ -35,7 +39,7 @@
 #define RELOCATABLE "R"
 #define EXTERNAL "E"
 
-#define ERR_SPACE_BETWEEN_PARAMS errors[0] //???
+#define ERR_SPACE_BETWEEN_PARAMS errors[0]
 #define ERR_MISSING_COMMA errors[1]
 #define ERR_TOO_MANY_COMMAS errors[2]
 #define ERR_DIRECTIVE_LINE_MUST_HAVE_LABEL errors[3]
