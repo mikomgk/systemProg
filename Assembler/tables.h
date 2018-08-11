@@ -2,6 +2,7 @@
 #define ASSEMBLER_TABLE_H
 
 #include "defenitions.h"
+
 /*instructions table - line counter,binary string*/
 int instructions_table_address[MAX_LINES];
 char instructions_table_word[MAX_LINES][WORD_SIZE];

@@ -116,10 +116,11 @@ void write_errors(char *file_name) {
         fprintf(stderr, "%s:%d: %s\n\t%s\n\n", file_name, error_table_data_line_number[i], error_table_error_string[i], error_table_data_line[i]);
 }
 
-int is_external(char *label){
-    int i=1;
-    for(;i<=symbol_table_address[0];i++)
-        if(!strcmp(label,symbol_table_label[i])) {
-            return !strcmp(symbol_table_type[i],EXTERN);
+int is_external(char *label) {
+    int i = 1;
+    for (; i <= symbol_table_address[0]; i++)
+        if (!strcmp(label, symbol_table_label[i])) {
+            return !strcmp(symbol_table_type[i], EXTERN);
         }
+    return 0;
 }

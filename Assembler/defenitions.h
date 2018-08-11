@@ -2,7 +2,13 @@
 #define ASSEMBLER_DEFENITIONS_H
 
 #include <stdio.h>
+#include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
+#include "settings.h"
+#include "tables.h"
+#include "text_handling.h"
+#include "binary_word.h"
 
 #define WORD_SIZE 14
 #define NUMBER_SIZE 12
@@ -69,5 +75,8 @@ enum tables {
 enum files{
     OBJECT_F,EXTERN_F,ENTRY_F
 };
+
+extern int error_flag,biggest_long_number,biggest_short_number, has_label_flag,LC;
+extern char original_line[LINE_SIZE];
 
 #endif //ASSEMBLER_DEFENITIONS_H

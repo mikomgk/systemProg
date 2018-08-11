@@ -9,7 +9,7 @@ char *addressing_1[] = {"1"};
 char *op_names[] = {"mov", "cmp", "add", "sub", "not", "clr", "lea", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop", NULL};
 char *op_code[] = {"....", ".../", "../.", "..//", "./..", "././", ".//.", ".///", "/...", "/../", "/./.", "/.//", "//..", "//./", "///.", "////", NULL};
 char *num_of_operands_per_op[] = {"2", "2", "2", "2", "1", "1", "2", "1", "1", "1", "1", "1", "1", "1", "0", "0", NULL};
-char **dest_operand_addressing_types_per_op[] = {addressing_13, addressing_013, addressing_13, addressing_13, addressing_13, addressing_13, addressing_13,
+char **destination_operand_addressing_types_per_op[] = {addressing_13, addressing_013, addressing_13, addressing_13, addressing_13, addressing_13, addressing_13,
                                                  addressing_13, addressing_13, addressing_123, addressing_123, addressing_13, addressing_013,
                                                  addressing_123, NULL, NULL, NULL};
 char **src_operand_addressing_types_per_op[] = {addressing_013, addressing_013, addressing_013, addressing_013, NULL, NULL, addressing_1, NULL, NULL, NULL,
@@ -45,7 +45,7 @@ char *errors[]={
         "ERROR: invalid integer",
         "ERROR: label name is too long",
         "ERROR: can't open file",
-        "ERROR: not an assembley file",
+        "ERROR: not an assembly file",
         "ERROR: number is too big"
 };
 
