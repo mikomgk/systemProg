@@ -47,7 +47,7 @@
 #define ERR_WRONG_OPERATION_NAME errors[12]
 #define ERR_ADDRESSING_MODE_IS_NOT_COMPATIBLE errors[13]
 #define ERR_REGISTER_NOT_EXIST errors[14] //???
-#define ERR_MISSING_OPERATION_NAME errors[15]
+#define ERR_MISSING_OPERATION_NAME errors[15] //???
 #define ERR_INVALID_INTEGER errors[16]
 #define ERR_LABEL_NAME_IS_TOO_LONG errors[17]
 #define ERR_CAN_NOT_OPEN_FILE errors[18]

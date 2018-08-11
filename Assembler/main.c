@@ -7,7 +7,7 @@
 void *mapping(char *word, char *words[], void *params[]);
 int trim(char *word, int in_brackets);
 void dec2bin(int num, char *binary_word, int size_of_word);
-int parser(char *line, char *label, char *operation, char *operandA, char *operandB, int line_counter, char *original_line, int *number_of_operators);
+int parse(char *trimmed_line, char **label, char **operation, char **operandA, char **operandB, int line_counter, char *original_line);
 int is_label_ok(char *label, int line_counter, char *original_line);
 int is_string_ok(char *string);
 char *get_addressing_type(char *operand, int *number_of_registers);
@@ -19,16 +19,16 @@ FILE *new_file(char *file_name, char *file_extention, char *new_extention);
 void insert_error_message(int LC, char *error_message, char *line);
 int biggest_number(int num_of_binary_digits);
 
-int error_flag,biggest_long_number,biggest_short_number;
+int error_flag,biggest_long_number,biggest_short_number, has_label_flag;
 
 int main(int argc, char *argv[]) {
     FILE *fp, *n_file;
     char line[LINE_SIZE], line_copy[LINE_SIZE], *label = NULL, *operation = NULL, *operandA = NULL, *operandB = NULL, binary_word[WORD_SIZE], *tmp, *operandA_type,
             *operandB_type, **addressin_options, *parameterA, *parameterB, file_name[FILENAME_MAX], *file_extention;
-    int LC, has_label_flag, label_exist_flag, label_ok_flag, addressing_type_2_flag, number_of_extra_words, number_of_operators, number_of_registers, i;
+    int LC, label_exist_flag, label_ok_flag, parsed_ok_flag, addressing_type_2_flag, number_of_extra_words, number_of_operators, number_of_registers, i;
     long number;
-    extern int error_fla,biggest_long_number,biggest_short_number;
-    biggest_long_number=biggest_number(WORD_SIZE),biggest_short_number=biggest_number(NUMBER_SIZE)
+    extern int error_fla, biggest_long_number, biggest_short_number;
+    biggest_long_number = biggest_number(WORD_SIZE), biggest_short_number = biggest_number(NUMBER_SIZE)
     if (argc == 1)
         return 0;
     while (--argc > 0) {
@@ -56,13 +56,14 @@ int main(int argc, char *argv[]) {
                 reset_binary_word(binary_word);
                 strcpy(line_copy, line);
                 trim(line_copy, 0);
-                //empty line or comment line
                 if (strlen(line_copy) == 0 || line_copy[0] == ';')
+                    //empty line or comment line
                     continue;
-                //parse line and checks error
-                if ((has_label_flag = parser(line_copy, label, operation, operandA, operandB, LC, line, &number_of_operators)) < 0)
-                    error_flag = 1;
-                has_label_flag = has_label_flag * (has_label_flag < 0 ? -1 : 1) - 1;
+                //parse line
+                parsed_ok_flag = parse(line_copy, &label, &operation, &operandA, &operandB, LC, line);
+                if (!parsed_ok_flag)
+                    //didn't parse
+                    continue;
                 if (has_label_flag) {
                     //TODO: has a label
                 }
@@ -79,22 +80,22 @@ int main(int argc, char *argv[]) {
                         //too many operands
                         if (operandB) {
                             insert_error_message(line, LC, ERR_WRONG_NUMBER_OF_OPERATORS);
-                        } else
+                        } else {
                             for (operandA = strtok(operandA, ","); *operandA; operandA = strtok(NULL, ",")) {
                                 number = strtol(operandA, &operandB, 10);
                                 //not an int
                                 if (operandB) {
                                     insert_error_message(LC, ERR_INVALID_INTEGER, line);
                                     break;
-                                } else if(number>biggest_long_number) {
-                                    insert_error_message(LC,ERR_NUMBER_IS_TOO_BIG,line);
-                                }else {
-                                        //enter binary number
+                                } else if (number > biggest_long_number) {
+                                    insert_error_message(LC, ERR_NUMBER_IS_TOO_BIG, line);
+                                } else {
+                                    //enter binary number
                                     dec2bin(number, binary_word, WORD_SIZE);
                                     replace_line(DATA_T, 0, binary_word, NULL);
-                                    }
                                 }
                             }
+                        }
                     } else if (!strcmp((operation + 1), STRING)) {
                         if (label_ok_flag && !label_exist_flag)
                             replace_line(SYMBOL_T, DC, label, DATA);
@@ -182,8 +183,8 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            //if there is no error
             if (!error_flag) {
+                /*there is no error*/
                 update_words_addresses(1, IC);
                 fseek(fp, 0, SEEK_SET);
                 IC = 0;
@@ -309,47 +310,62 @@ void write_operand_addressing(char *operation, char *operand, char *binary_word,
         insert_error_message(LC,ERR_ADDRESSING_MODE_IS_NOT_COMPATIBLE,line);
 }
 
-int parser(char *line, char *label, char *operation, char *operandA, char *operandB, int line_counter, char *original_line, int *number_of_operators) {
-    int is_label = 1, count_spaces = 0;
-    char *pnt = line, *tmp = NULL;
-    label = NULL;
-    operation = NULL;
-    operandA = NULL;
-    operandB = NULL;
-    //convert commas with space
+int parse(char *trimmed_line, char **label, char **operation, char **operandA, char **operandB, int line_counter, char *original_line) {
+    int count_spaces = 0, count_commas = 0;
+    char *pnt = trimmed_line, *tmp = NULL;
+    *label = NULL;
+    *operation = NULL;
+    *operandA = NULL;
+    *operandB = NULL;
+    //count spaces and commas
     for (; *pnt && *pnt != '(' && *pnt != '\"'; pnt++) {
-        //TODO: check number array with nd without label
-        if (count_spaces == 1 && isdigit(*pnt))
-            break;
         if (*pnt == ' ')
             count_spaces++;
-        if (*pnt == ',') {
+        else if (*pnt == ',') {
+            count_commas++;
             if (*(pnt + 1) == ',') {
                 replace_line(ERROR_T, line_counter, ERR_TOO_MANY_COMMAS, original_line);
-                is_label *= -1;
-            } else
-                *pnt = ' ';
-        }
+                count_commas--;
+            }
+        } else if (count_spaces == 1 && *(pnt - 1) == ' ' && isdigit(*pnt))
+            /*operandA is numbers array*/
+            break;
     }
-    //one word in line
     if (count_spaces == 0) {
-        replace_line(ERROR_T, line_counter, ERR_MISSING_OPERATION_NAME, original_line);
-        is_label *= is_label > 0 ? -1 : 1;
-    } else if (count_spaces == 1)
-        sscanf(line, "%s%s%s%s", operation, operandA, operandB, tmp);
-    else if (count_spaces == 2) {
-        sscanf(line, "%s%s%s%s%s", label, operation, operandA, operandB, tmp);
-        is_label += is_label > 0 ? 1 : -1;
-    } else {
+        /*wrong number of operators or too many commas*/
+        replace_line(ERROR_T, line_counter, count_commas ? ERR_TOO_MANY_COMMAS : ERR_WRONG_NUMBER_OF_OPERATORS, original_line);
+        return 0;
+    } else if (count_spaces > 2) {
+        /*too many spaces*/
         replace_line(ERROR_T, line_counter, ERR_MISSING_COMMA, original_line);
-        is_label *= is_label > 0 ? -1 : 1;
+        return 0;
+    } else if (count_spaces == 1) {
+        /*no label*/
+        *operation = strtok(trimmed_line, " ");
+    } else if (count_spaces == 2) {
+        /*yes label*/
+        *label = strtok(trimmed_line, " ");
+        *operation = strtok(NULL, " ");
+        has_label_flag = 1;
+    }
+    *operandA = strtok(NULL, ",");
+    if(**operandA=='\"') {
+        /*in a string*/
+        for (tmp = *(operandA + 1); *tmp != '\"'; tmp++)
+            /**/;
+        tmp++;
+    }else {
+        if (!isdigit(**operandA))
+            /*operandA is not .data input*/
+            *operandB = strtok(NULL, ",");
+        tmp = strtok(NULL, " ");
     }
     if (tmp) {
+        /*there's an extra parameter*/
         replace_line(ERROR_T, line_counter, ERR_WRONG_NUMBER_OF_OPERATORS, original_line);
-        is_label *= is_label > 0 ? -1 : 1;
-        *number_of_operators = -1;
+        return 0;
     }
-    return is_label;
+    return 1;
 }
 
 void *mapping(char *word, char *words[], void *params[]) {
@@ -364,25 +380,23 @@ void *mapping(char *word, char *words[], void *params[]) {
 int trim(char *word, int in_brackets) {
     char *ptr = word, *start = word, *tmp;
     int trimmed_flag = 0;
+    /*trim leading and finishing white characters*/
     for (; isspace(*word); word++)
         /**/;
     for (; *word; *ptr++ = *word++)
         /**/;
-    for (--word; isspace(*ptr); ptr--)
+    for (--ptr; isspace(*ptr); ptr--)
         /**/;
     *++ptr = '\0';
+    /*trim inword white characters*/
     for (ptr = word = start; *word; *ptr++ = *word++) {
-        if (!in_brackets && *word == '\"') {
-            for (; *word != '\"'; *ptr++ = *word++)
+        if (*word == '\"') {
+            for (*ptr++ = *word++; *word != '\"'; *ptr++ = *word++)
                 /**/;
-            continue;
-        }
-        if (!in_brackets && *word == '(') {
+        } else if (!in_brackets && *word == '(') {
             for (; *word != ')'; *ptr++ = *word++)
                 /**/;
-            continue;
-        }
-        if (isspace(*word)) {
+        } else if (isspace(*word)) {
             tmp = word - 1;
             for (; isspace(*word); word++)
                 /**/;
