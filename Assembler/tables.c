@@ -61,13 +61,13 @@ void write_table_to_file(FILE *f,enum files file_type) {
             }
             break;
         case EXTERN_F:
-            for(i=1;i<symbol_table_address[0],i++){
+            for(i=1;i<symbol_table_address[0];i++){
                 if(!strcmp(symbol_table_type[i],EXTERN))
                     fprintf(f,"%s %d",symbol_table_label[i],symbol_table_address[i]);
             }
             break;
         case ENTRY_F:
-            for(i=1;i<symbol_table_address[0],i++){
+            for(i=1;i<symbol_table_address[0];i++){
                 if(!strcmp(symbol_table_type[i],ENTRY))
                     fprintf(f,"%s %d",symbol_table_label[i],symbol_table_address[i]);
             }
@@ -96,9 +96,10 @@ void update_words_addresses(int only_data_table,int delta) {
 void change_to_entry(char *label){
     int i=1;
     for(;i<=symbol_table_address[0];i++)
-        if(!strcmp(label,symbol_table_label[i]))
-            break;
-    strcpy(symbol_table_type[i],ENTRY);
+        if(!strcmp(label,symbol_table_label[i])) {
+            strcpy(symbol_table_type[i], ENTRY);
+            return;
+        }
 }
 
 int get_symbol_address(char *label){
@@ -113,4 +114,12 @@ void write_errors(char *file_name) {
     int i = 1;
     for (; i <= error_table_data_line_number[0]; i++)
         fprintf(stderr, "%s:%d: %s\n\t%s\n\n", file_name, error_table_data_line_number[i], error_table_error_string[i], error_table_data_line[i]);
+}
+
+int is_external(char *label){
+    int i=1;
+    for(;i<=symbol_table_address[0];i++)
+        if(!strcmp(label,symbol_table_label[i])) {
+            return !strcmp(symbol_table_type[i],EXTERN);
+        }
 }

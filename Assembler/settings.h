@@ -29,7 +29,7 @@ char *errors[]={
         "ERROR: spaces between parameters",
         "ERROR: missing comma",
         "ERROR: too many commas",
-        "ERROR: comma not allowed",
+        "ERROR: directive line must have a label",
         "ERROR: missing quotation mark",
         "ERROR: too many quotation marks",
         "ERROR: wrong number of operators",

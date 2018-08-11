@@ -29,5 +29,6 @@ void change_to_entry(char *label);
 int get_symbol_address(char *label);
 void write_errors(char *file_name);
 void write_table_to_file(FILE *f,enum files file_type);
+int is_external(char *label);
 
 #endif //ASSEMBLER_TABLE_H
