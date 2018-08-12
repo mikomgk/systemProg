@@ -76,12 +76,12 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
         has_label_flag = 1;
     }
     *operandA = strtok(NULL, ",");
-    if(**operandA=='\"') {
+    if (**operandA == '\"') {
         /*in a string*/
         for (tmp = *(operandA + 1); *tmp != '\"'; tmp++)
             /**/;
         tmp++;
-    }else {
+    } else {
         if (!isdigit(**operandA))
             /*operandA is not .data input*/
             *operandB = strtok(NULL, ",");
@@ -95,7 +95,7 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
     return 1;
 }
 
-int parse_addressing_type_2_parameters(char *original_operand,char **addressing_type_2_jumping_label,char **parameterA,char **parameterB) {
+int parse_addressing_type_2_parameters(char *original_operand, char **addressing_type_2_jumping_label, char **parameterA, char **parameterB) {
     *addressing_type_2_jumping_label = strtok(original_operand, "(");
     *parameterA = strtok(NULL, ",");
     *parameterB = strtok(NULL, ")");
@@ -136,13 +136,13 @@ int is_label_ok(char *label, int print_error) {
         error = 3;
     } else
         *pnt = '\0';
-    if (mapping(label, op_names, (void **)op_code))
+    if (mapping(label, op_names, (void **) op_code))
         /*label is operation name*/
         error = 4;
-    if (mapping(label, register_names, (void **)register_code))
+    if (mapping(label, register_names, (void **) register_code))
         /*label is register name*/
         error = 4;
-    if (mapping(label, directives, (void **)directives_number))
+    if (mapping(label, directives, (void **) directives_number))
         /*label is directive name*/
         error = 4;
     if (error == 4) {
