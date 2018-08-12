@@ -64,7 +64,7 @@
 #define ERR_NOT_AN_ASSEMBLY_FILE errors[19]
 #define ALERT_LABEL_MEANINGLESS alerts[1]
 
-extern int error_flag, biggest_long_number, biggest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, LC;
+extern int error_flag, biggest_long_number, biggest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, number_of_operators, LC;
 extern char original_line[LINE_SIZE], assembler_name[LABEL_SIZE];
 
 #endif /*ASSEMBLER_DEFINITIONS_H*/

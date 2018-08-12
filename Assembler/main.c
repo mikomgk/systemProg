@@ -2,14 +2,14 @@
 
 FILE *new_file(char *file_name, char *file_extension, char *new_extension);
 
-int error_flag, biggest_long_number, biggest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, LC;
+int error_flag, biggest_long_number, biggest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, number_of_operators, LC;
 char original_line[LINE_SIZE], assembler_name[LABEL_SIZE];
 
 int main(int argc, char *argv[]) {
     FILE *fp, *n_file;
     char trimmed_line[LINE_SIZE], *label = NULL, *operation = NULL, *operandA = NULL, *operandB = NULL, binary_word[WORD_SIZE], *tmp = NULL, *operandA_type = NULL,
             *operandB_type = NULL, *addressing_type_2_jumping_label = NULL, file_name[FILENAME_MAX], *file_extension = NULL;
-    int label_exist_flag, label_ok_flag, parsed_ok_flag, number_of_extra_words, number_of_operators, is_first_operator,
+    int label_exist_flag, label_ok_flag, parsed_ok_flag, number_of_extra_words, is_first_operator,
             is_source_operand, i;
     long number;
     strcpy(assembler_name, (tmp = strrchr(*argv, '/')) ? tmp + 1 : *argv);
@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
                                 number_of_operators = 1;
                             break;
                         case 2:
-                            /*TODO: check number_of_operators in parse()*/
+                            /*number_of_operators assigned to -1 in parse() if there's another word after operandB*/
                             if (number_of_operators == 0)
                                 number_of_operators = 2;
                         default:
@@ -207,9 +207,13 @@ int main(int argc, char *argv[]) {
                 *ic = 0;
                 /*second round*/
                 while (fgets(original_line, LINE_SIZE, fp)) {
+                    addressing_type_2_flag = 0;
                     number_of_registers = 0;
                     number_of_operators = 0;
-                    /*TODO: copy line, parse, trim*/
+                    reset_binary_word(binary_word);
+                    strcpy(trimmed_line, original_line);
+                    trim(trimmed_line, 0);
+                    parse(trimmed_line, &label, &operation, &operandA, &operandB);
                     if (*operation == '.') {
                         /*directive line*/
                         if (!strcmp(operation + 1, ENTRY))

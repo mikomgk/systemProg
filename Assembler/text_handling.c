@@ -90,6 +90,7 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
     if (tmp) {
         /*there's an extra parameter*/
         insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
+        number_of_operators = -1;
         return 0;
     }
     return 1;
