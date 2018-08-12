@@ -19,13 +19,13 @@ void dec2bin(int num, char *binary_word, int size_of_word) {
             binary_word[i] = '.';
 }
 
-char *get_addressing_type(char *operand, int *number_of_registers) {
+char *get_addressing_type(char *operand) {
     if (!operand)
         return NULL;
     if (*operand == '#')
         return IMMEDIATE_ADDRESSING;
     if (mapping(operand, register_names, (void **)register_names)) {
-        (*number_of_registers)++;
+        number_of_registers++;
         return REGISTER_ADDRESSING;
     }
     for (; *operand; operand++)
@@ -34,19 +34,23 @@ char *get_addressing_type(char *operand, int *number_of_registers) {
     return LABEL_ADDRESSING;
 }
 
-void write_operand_addressing(char *operation, char *operand, char *binary_word, char *tmp, int operandBinaryIndex, int *number_of_registers, int
-*addressing_type_2_flag) {
-    char *operand_type,**addressing_options;
-    if(!operand)
+void write_operand_addressing(char *operation, char *operand, char *binary_word, int operandBinaryIndex,char ***operand_addressing_types_per_op) {
+    char *operand_type, **addressing_options, *tmp;
+    if (!operand)
         /*no operand - do nothing*/
         return;
-    operand_type = get_addressing_type(operand, number_of_registers);
-    addressing_options = mapping(operation, op_names, (void **)destination_operand_addressing_types_per_op);
+    operand_type = get_addressing_type(operand);
+    if (operand_addressing_types_per_op)
+        /*operand_addressing_types_per_op is not null*/
+        addressing_options = mapping(operation, op_names, (void **) operand_addressing_types_per_op);
+    else
+        /*operand_addressing_types_per_op is null - parameters of addressing type 2 can have all addressing types beside 2*/
+        addressing_options = addressing_013;
     if (!strcmp(operand_type, JUMPING_ADDRESSING))
-        *addressing_type_2_flag = 1;
-    if (mapping(operand_type, addressing_options, (void **)addressing_options) || !operation) {
+        addressing_type_2_flag = 1;
+    if (mapping(operand_type, addressing_options, (void **) addressing_options) || !operation) {
         /*correct addressing type*/
-        if ((tmp = (char *) mapping(operand_type, addressing_types, (void **)addressing_types_code)))
+        if ((tmp = (char *) mapping(operand_type, addressing_types, (void **) addressing_types_code)))
             strcpy(binary_word + operandBinaryIndex, tmp);
     } else
         /*wrong addressing type*/
@@ -58,8 +62,8 @@ void write_parameter_binary_word(char *binary_word, char *operand, int operand_t
     char *tmp = NULL;
     reset_binary_word(binary_word);
     if (option_operandB) {
-        strcpy(binary_word + SOURCE_REGISTER_INDEX, mapping(operand, register_names, (void **)register_code));
-        strcpy(binary_word + DESTINATION_REGISTER_INDEX, mapping(option_operandB, register_names, (void **)register_code));
+        strcpy(binary_word + SOURCE_REGISTER_INDEX, mapping(operand, register_names, (void **) register_code));
+        strcpy(binary_word + DESTINATION_REGISTER_INDEX, mapping(option_operandB, register_names, (void **) register_code));
         return;
     }
     switch (operand_type) {
@@ -79,11 +83,17 @@ void write_parameter_binary_word(char *binary_word, char *operand, int operand_t
             number = get_symbol_address(operand);
             if (number == -1)
                 insert_error_message(ERR_LABEL_NAME_IS_NOT_EXIST);
-            else
+            else {
                 dec2bin(number, binary_word, NUMBER_SIZE);
+                strcpy(binary_word + ARE_INDEX, mapping(is_external(operand)
+                                                        ? EXTERNAL
+                                                        : RELOCATABLE, are, (void **) are_code));
+            }
             break;
         case 3:
-            strcpy(binary_word + (is_destination_operand ? DESTINATION_REGISTER_INDEX : SOURCE_REGISTER_INDEX), mapping(operand, register_names, (void **)register_code));
+            strcpy(binary_word + (is_destination_operand
+                                  ? DESTINATION_REGISTER_INDEX
+                                  : SOURCE_REGISTER_INDEX), mapping(operand, register_names, (void **) register_code));
             break;
     }
 }

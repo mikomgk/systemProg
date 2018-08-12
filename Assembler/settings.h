@@ -12,7 +12,7 @@ char *num_of_operands_per_op[] = {"2", "2", "2", "2", "1", "1", "2", "1", "1", "
 char **destination_operand_addressing_types_per_op[] = {addressing_13, addressing_013, addressing_13, addressing_13, addressing_13, addressing_13, addressing_13,
                                                  addressing_13, addressing_13, addressing_123, addressing_123, addressing_13, addressing_013,
                                                  addressing_123, NULL, NULL, NULL};
-char **src_operand_addressing_types_per_op[] = {addressing_013, addressing_013, addressing_013, addressing_013, NULL, NULL, addressing_1, NULL, NULL, NULL,
+char **source_operand_addressing_types_per_op[] = {addressing_013, addressing_013, addressing_013, addressing_013, NULL, NULL, addressing_1, NULL, NULL, NULL,
                                                 NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 char *register_names[] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", NULL};
 char *register_code[] = {"......", "...../ERROR:", "..../.", "....//", ".../..", "..././", "...//.", "...///", NULL};
@@ -40,13 +40,13 @@ char *errors[]={
         "ERROR: label name is not exist",
         "ERROR: wrong operation name",
         "ERROR: addressing mode is not compatible with the given operation",
-        "ERROR: register is not exist",
+        "ERROR: number is too big",
         "ERROR: missing operation name",
         "ERROR: invalid integer",
         "ERROR: label name is too long",
         "ERROR: can't open file",
         "ERROR: not an assembly file",
-        "ERROR: number is too big"
+        ""
 };
 
 char *alerts[]={

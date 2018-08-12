@@ -95,8 +95,8 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
     return 1;
 }
 
-int parse_addressing_type_2_parameters(char *original_parameter,char **addressing_type_2_jumping_label,char **parameterA,char **parameterB) {
-    *addressing_type_2_jumping_label = strtok(original_parameter, "(");
+int parse_addressing_type_2_parameters(char *original_operand,char **addressing_type_2_jumping_label,char **parameterA,char **parameterB) {
+    *addressing_type_2_jumping_label = strtok(original_operand, "(");
     *parameterA = strtok(NULL, ",");
     *parameterB = strtok(NULL, ")");
     if (!*addressing_type_2_jumping_label || !*parameterA || !*parameterB)

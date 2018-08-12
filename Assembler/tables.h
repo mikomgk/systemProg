@@ -1,7 +1,7 @@
 #ifndef ASSEMBLER_TABLE_H
 #define ASSEMBLER_TABLE_H
 
-#include "defenitions.h"
+#include "definitions.h"
 
 /*instructions table - line counter,binary string*/
 int instructions_table_address[MAX_LINES];
