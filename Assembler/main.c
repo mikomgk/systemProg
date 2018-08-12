@@ -2,8 +2,8 @@
 
 FILE *new_file(char *file_name, char *file_extension, char *new_extension);
 
-int error_flag, biggest_long_number, biggest_short_number, has_label_flag,addressing_type_2_flag, number_of_registers, LC;
-char original_line[LINE_SIZE];
+int error_flag, biggest_long_number, biggest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, LC;
+char original_line[LINE_SIZE], assembler_name[LABEL_SIZE];
 
 int main(int argc, char *argv[]) {
     FILE *fp, *n_file;
@@ -12,17 +12,21 @@ int main(int argc, char *argv[]) {
     int label_exist_flag, label_ok_flag, parsed_ok_flag, number_of_extra_words, number_of_operators, is_first_operator,
             is_source_operand, i;
     long number;
+    strcpy(assembler_name, (tmp = strrchr(*argv, '/')) ? tmp + 1 : *argv);
+    if (argc == 1) {
+        fprintf(stderr, "%s: ERROR: no input files", assembler_name);
+        return 0;
+    }
     biggest_long_number = biggest_number(WORD_SIZE);
     biggest_short_number = biggest_number(NUMBER_SIZE);
-    if (argc == 1)
-        return 0;
     while (--argc > 0) {
-        strcpy(file_name, argv[0]);
+        strcpy(file_name, *++argv);
         if ((file_extension = strchr(file_name, '.')) == NULL || strcmp(file_extension, ASSEMBLY_EXTENSION)) {
             /*not an assembly file*/
             insert_error_message(ERR_NOT_AN_ASSEMBLY_FILE);
+            continue;
         }
-        if ((fp = fopen(*++argv, "r")) == NULL) {
+        if ((fp = fopen(*argv, "r")) == NULL) {
             /*file not open*/
             insert_error_message(ERR_CAN_NOT_OPEN_FILE);
         } else {
@@ -64,7 +68,7 @@ int main(int argc, char *argv[]) {
                     if (!strcmp((operation + 1), DATA)) {
                         /*.data line*/
                         if (label_ok_flag && !label_exist_flag)
-                            replace_line(SYMBOL_T, DC, label, DATA);
+                            replace_line(SYMBOL_T, *dc, label, DATA);
                         if (operandB) {
                             /*too many operands*/
                             insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
@@ -89,7 +93,7 @@ int main(int argc, char *argv[]) {
                     } else if (!strcmp((operation + 1), STRING)) {
                         /*.string line*/
                         if (label_ok_flag && !label_exist_flag)
-                            replace_line(SYMBOL_T, DC, label, DATA);
+                            replace_line(SYMBOL_T, *dc, label, DATA);
                         if (operandB) {
                             /*too many operands*/
                             insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
@@ -129,7 +133,7 @@ int main(int argc, char *argv[]) {
                 } else {
                     /*operation line*/
                     if (label_ok_flag && !label_exist_flag)
-                        replace_line(SYMBOL_T, DC, label, OPERATION);
+                        replace_line(SYMBOL_T, *dc, label, OPERATION);
                     if ((tmp = (char *) mapping(operation, op_names, (void **) op_code)))
                         strcpy(binary_word + OPERATION_CODE_INDEX, tmp);
                     else {
@@ -192,15 +196,15 @@ int main(int argc, char *argv[]) {
                         }
                         replace_line(INSTRUCTIONS_T, 0, binary_word, NULL);
                         number_of_extra_words = number_of_extra_words + number_of_operators - (number_of_registers == 2 ? 1 : 0);
-                        IC += number_of_extra_words;
+                        *ic += number_of_extra_words;
                     }
                 }
             }
             if (!error_flag) {
                 /*there is no error*/
-                update_words_addresses(1, IC);
+                update_words_addresses(1, *ic);
                 fseek(fp, 0, SEEK_SET);
-                IC = 0;
+                *ic = 0;
                 /*second round*/
                 while (fgets(original_line, LINE_SIZE, fp)) {
                     number_of_registers = 0;
@@ -225,7 +229,7 @@ int main(int argc, char *argv[]) {
                             number_of_operators = 1;
                     }
                     /*increase IC to effect the extra word and not the instruction word*/
-                    IC++;
+                    (*ic)++;
                     if (addressing_type_2_flag) {
                         /*write label word of addressing type 2 if needed*/
                         reset_binary_word(binary_word);

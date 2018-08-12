@@ -25,8 +25,6 @@
 #define ARE_INDEX 12
 #define SOURCE_REGISTER_INDEX 0
 #define DESTINATION_REGISTER_INDEX 6
-#define IC instructions_table_address[0]
-#define DC data_table_address[0]
 #define DATA "data"
 #define STRING "string"
 #define OPERATION "operation"
@@ -49,7 +47,7 @@
 #define ERR_TOO_MANY_COMMAS errors[2]
 #define ERR_DIRECTIVE_LINE_MUST_HAVE_LABEL errors[3]
 #define ERR_MISSING_QUOTATION_MARK errors[4]
-#define ERR_TOO_MANY_QUOTATION_MARKS errors[5] //???
+#define ERR_TOO_MANY_QUOTATION_MARKS errors[5] /*???*/
 #define ERR_WRONG_NUMBER_OF_OPERATORS errors[6]
 #define ERR_LABEL_NAME_IS_NOT_ALLOWED errors[7]
 #define ERR_LABEL_NAME_ALREADY_IN_USE errors[8]
@@ -66,15 +64,7 @@
 #define ERR_NOT_AN_ASSEMBLY_FILE errors[19]
 #define ALERT_LABEL_MEANINGLESS alerts[1]
 
-enum tables {
-    INSTRUCTIONS_T, DATA_T, SYMBOL_T, ERROR_T
-};
+extern int error_flag, biggest_long_number, biggest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, LC;
+extern char original_line[LINE_SIZE], assembler_name[LABEL_SIZE];
 
-enum files{
-    OBJECT_F,EXTERN_F,ENTRY_F
-};
-
-extern int error_flag,biggest_long_number,biggest_short_number, has_label_flag,addressing_type_2_flag,number_of_registers,LC;
-extern char original_line[LINE_SIZE];
-
-#endif //ASSEMBLER_DEFINITIONS_H
+#endif /*ASSEMBLER_DEFINITIONS_H*/

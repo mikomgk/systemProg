@@ -1,4 +1,4 @@
-#include <math.h>
+//#include <math.h>
 #include "binary_word.h"
 
 void *mapping(char *word, char *words[], void *params[]) {
@@ -24,7 +24,7 @@ char *get_addressing_type(char *operand) {
         return NULL;
     if (*operand == '#')
         return IMMEDIATE_ADDRESSING;
-    if (mapping(operand, register_names, (void **)register_names)) {
+    if (mapping(operand, register_names, (void **) register_names)) {
         number_of_registers++;
         return REGISTER_ADDRESSING;
     }
@@ -34,7 +34,7 @@ char *get_addressing_type(char *operand) {
     return LABEL_ADDRESSING;
 }
 
-void write_operand_addressing(char *operation, char *operand, char *binary_word, int operandBinaryIndex,char ***operand_addressing_types_per_op) {
+void write_operand_addressing(char *operation, char *operand, char *binary_word, int operandBinaryIndex, char ***operand_addressing_types_per_op) {
     char *operand_type, **addressing_options, *tmp;
     if (!operand)
         /*no operand - do nothing*/
@@ -113,5 +113,12 @@ int biggest_number(int num_of_binary_digits) {
     int i = 0, sum = 0;
     for (; i < num_of_binary_digits; i++)
         sum += pow(2, i);
+    return sum;
+}
+
+int pow(int x, int y) {
+    int sum = 1, i;
+    for (i = 0; i < y; i++)
+        sum *= x;
     return sum;
 }
