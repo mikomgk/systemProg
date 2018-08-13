@@ -37,14 +37,14 @@ int trim(char *word, int in_brackets) {
 }
 
 int parse(char *trimmed_line, char **label, char **operation, char **operandA, char **operandB) {
-    int count_spaces = 0, count_commas = 0;
+    int count_spaces = 0, count_commas = 0, special_char = 0;
     char *pnt = trimmed_line, *tmp = NULL;
     *label = NULL;
     *operation = NULL;
     *operandA = NULL;
     *operandB = NULL;
     /*count spaces and commas*/
-    for (; *pnt && *pnt != '(' && *pnt != '\"'; pnt++) {
+    for (; *pnt; pnt++) {
         if (*pnt == ' ')
             count_spaces++;
         else if (*pnt == ',') {
@@ -54,9 +54,14 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
                 insert_error_message(ERR_TOO_MANY_COMMAS);
                 count_commas--;
             }
-        } else if (count_spaces == 1 && *(pnt - 1) == ' ' && isdigit(*pnt))
-            /*operandA is numbers array*/
+        } else if (*pnt == '(' || *pnt == '\"') {
+            special_char = 1;
             break;
+        } else if (count_spaces > 1 && *(pnt - 1) == ' ' && isdigit(*pnt)) {
+            /*operandA is numbers array*/
+            special_char = 1;
+            break;
+        }
     }
     if (count_spaces == 0) {
         /*wrong number of operators or too many commas*/
@@ -75,7 +80,7 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
         *operation = strtok(NULL, " ");
         has_label_flag = 1;
     }
-    *operandA = strtok(NULL, ",");
+    *operandA = strtok(NULL, special_char ? "\0" : ",");
     if (**operandA == '\"') {
         /*in a string*/
         for (tmp = *(operandA + 1); *tmp != '\"'; tmp++)
@@ -109,7 +114,7 @@ int parse_addressing_type_2_parameters(char *original_operand, char **addressing
     return 1;
 }
 
-int is_label_ok(char *label, int print_error) {
+int is_label_ok(char *label, int print_error, int is_extern) {
     int error = 0;
     char *pnt = label;
     if (strlen(pnt) > LABEL_SIZE + 1) {
@@ -121,7 +126,7 @@ int is_label_ok(char *label, int print_error) {
     }
     if (!isalpha(*pnt++))
         error = 2;
-    for (; *pnt; pnt++) {
+    for (; *pnt && *pnt!=':'; pnt++) {
         if (!isalnum(*pnt))
             error = 2;
     }
@@ -130,7 +135,7 @@ int is_label_ok(char *label, int print_error) {
             return 0;
         insert_error_message(ERR_LABEL_NAME_IS_NOT_ALLOWED);
     }
-    if (*--pnt != ':') {
+    if (!is_extern && *pnt != ':') {
         if (!print_error)
             return 0;
         insert_error_message(ERR_MISSING_COLON_AFTER_LABEL);

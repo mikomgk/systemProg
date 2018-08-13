@@ -42,6 +42,10 @@ int main(int argc, char *argv[]) {
                 addressing_type_2_flag = 0;
                 has_label_flag = 0;
                 number_of_registers = 0;
+                label_exist_flag=0;
+                label_ok_flag=0;
+                parsed_ok_flag=0;
+
                 reset_binary_word(binary_word);
                 strcpy(trimmed_line, original_line);
                 trim(trimmed_line, 0);
@@ -53,20 +57,22 @@ int main(int argc, char *argv[]) {
                 if (!parsed_ok_flag)
                     /*didn't parse*/
                     continue;
-                /*label already exist*/
-                label_ok_flag = is_label_ok(label, 1);
-                if ((label_exist_flag = has_label_flag ? is_label_exist(label) : 0)) {
-                    insert_error_message(ERR_LABEL_NAME_ALREADY_IN_USE);
+                if (label) {
+                    /*checks if label already exist*/
+                    label_ok_flag = is_label_ok(label, 1,0);
+                    if ((label_exist_flag = has_label_flag ? is_label_exist(label) : 0)) {
+                        insert_error_message(ERR_LABEL_NAME_ALREADY_IN_USE);
+                    }
                 }
                 if (*operation == '.') {
                     /*directive line*/
-                    if (!has_label_flag) {
-                        /*directive line without a label*/
-                        insert_error_message(ERR_DIRECTIVE_LINE_MUST_HAVE_LABEL);
-                        continue;
-                    }
                     if (!strcmp((operation + 1), DATA)) {
                         /*.data line*/
+                        if (!has_label_flag) {
+                            /*directive line without a label*/
+                            insert_error_message(ERR_DIRECTIVE_LINE_MUST_HAVE_LABEL);
+                            continue;
+                        }
                         if (label_ok_flag && !label_exist_flag)
                             replace_line(SYMBOL_T, *dc, label, DATA);
                         if (operandB) {
@@ -92,6 +98,11 @@ int main(int argc, char *argv[]) {
                         }
                     } else if (!strcmp((operation + 1), STRING)) {
                         /*.string line*/
+                        if (!has_label_flag) {
+                            /*directive line without a label*/
+                            insert_error_message(ERR_DIRECTIVE_LINE_MUST_HAVE_LABEL);
+                            continue;
+                        }
                         if (label_ok_flag && !label_exist_flag)
                             replace_line(SYMBOL_T, *dc, label, DATA);
                         if (operandB) {
@@ -117,7 +128,7 @@ int main(int argc, char *argv[]) {
                         if (operandB) {
                             /*too many operands*/
                             insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
-                        } else if (!is_label_ok(operandA, 1)) {
+                        } else if (!is_label_ok(operandA, 1,1)) {
                             /*extern label name is not allowed*/
                             continue;
                         } else if (is_label_exist(operandA)) {
@@ -137,7 +148,7 @@ int main(int argc, char *argv[]) {
                     if ((tmp = (char *) mapping(operation, op_names, (void **) op_code)))
                         strcpy(binary_word + OPERATION_CODE_INDEX, tmp);
                     else {
-                        if (!has_label_flag && is_label_ok(operation, 0))
+                        if (!has_label_flag && is_label_ok(operation, 0,0))
                             /*operation name is missing*/
                             insert_error_message(ERR_MISSING_OPERATION_NAME);
                         else
