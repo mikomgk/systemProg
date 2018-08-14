@@ -17,7 +17,7 @@ extern int *const dc;
 void clear_tables();
 void replace_line(enum tables table, int int_data, char *string_data, char *string_data2);
 int is_label_exist(char *label);
-void update_words_addresses(int only_data_table, int delta);
+void update_words_addresses(int instructions_only, int program_offset);
 void change_to_entry(char *label);
 int get_symbol_address(char *label);
 void write_errors(char *file_name);

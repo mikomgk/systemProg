@@ -51,7 +51,7 @@ void write_operand_addressing(char *operation, char *operand, char *binary_word,
     if (mapping(operand_type, addressing_options, (void **) addressing_options) || !operation) {
         /*correct addressing type*/
         if ((tmp = (char *) mapping(operand_type, addressing_types, (void **) addressing_types_code)))
-            strcpy(binary_word + operandBinaryIndex, tmp);
+            strncpy(binary_word + operandBinaryIndex, tmp,ADDRESSING_CODE_LENGTH);
     } else
         /*wrong addressing type*/
         insert_error_message(ERR_ADDRESSING_MODE_IS_NOT_COMPATIBLE);
@@ -62,14 +62,14 @@ void write_parameter_binary_word(char *binary_word, char *operand, int operand_t
     char *tmp = NULL;
     reset_binary_word(binary_word);
     if (option_operandB) {
-        strcpy(binary_word + SOURCE_REGISTER_INDEX, mapping(operand, register_names, (void **) register_code));
-        strcpy(binary_word + DESTINATION_REGISTER_INDEX, mapping(option_operandB, register_names, (void **) register_code));
+        strncpy(binary_word + SOURCE_REGISTER_INDEX, mapping(operand, register_names, (void **) register_code),REGISTER_CODE_LENGTH);
+        strncpy(binary_word + DESTINATION_REGISTER_INDEX, mapping(option_operandB, register_names, (void **) register_code),REGISTER_CODE_LENGTH);
         return;
     }
     switch (operand_type) {
         case 0:
             number = strtol(operand + 1, &tmp, 10);
-            if (tmp) {
+            if (*tmp) {
                 insert_error_message(ERR_INVALID_INTEGER);
                 return;
             }
@@ -85,15 +85,15 @@ void write_parameter_binary_word(char *binary_word, char *operand, int operand_t
                 insert_error_message(ERR_LABEL_NAME_IS_NOT_EXIST);
             else {
                 dec2bin(number, binary_word, NUMBER_SIZE);
-                strcpy(binary_word + ARE_INDEX, mapping(is_external(operand)
+                strncpy(binary_word + ARE_INDEX, mapping(is_external(operand)
                                                         ? EXTERNAL
-                                                        : RELOCATABLE, are, (void **) are_code));
+                                                        : RELOCATABLE, are, (void **) are_code),ARE_CODE_LENGTH);
             }
             break;
         case 3:
-            strcpy(binary_word + (is_destination_operand
+            strncpy(binary_word + (is_destination_operand
                                   ? DESTINATION_REGISTER_INDEX
-                                  : SOURCE_REGISTER_INDEX), mapping(operand, register_names, (void **) register_code));
+                                  : SOURCE_REGISTER_INDEX), mapping(operand, register_names, (void **) register_code),REGISTER_CODE_LENGTH);
             break;
     }
 }

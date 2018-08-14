@@ -43,13 +43,13 @@ void replace_line(enum tables table, int int_data, char *string_data, char *stri
         case INSTRUCTIONS_T:
             line = *ic + 1;
             instructions_table_address[line] = line - 1;
-            strcpy(instructions_table_word[line], string_data);
+            strncpy(instructions_table_word[line], string_data,WORD_SIZE);
             (*ic)++;
             break;
         case DATA_T:
             line = *dc + 1;
             data_table_address[line] = line - 1;
-            strcpy(data_table_word[line], string_data);
+            strncpy(data_table_word[line], string_data,WORD_SIZE);
             (*dc)++;
             break;
         case SYMBOL_T:
@@ -73,25 +73,24 @@ void write_table_to_file(FILE *f, enum files file_type) {
     int i;
     switch (file_type) {
         case OBJECT_F:
-            update_words_addresses(0, BEGINNING_ADDRESS);
             fprintf(f, "%d %d", *ic, *dc);
             for (i = 1; i <= *ic; i++) {
-                fprintf(f, "\n%.4d\t%s", instructions_table_address[i], instructions_table_word[i]);
+                fprintf(f, "\n%.4d\t%.*s", instructions_table_address[i], WORD_SIZE, instructions_table_word[i]);
             }
             for (i = 1; i <= *dc; i++) {
-                fprintf(f, "\n%.4d\t%s", data_table_address[i], data_table_word[i]);
+                fprintf(f, "\n%.4d\t%.*s", data_table_address[i], WORD_SIZE, data_table_word[i]);
             }
             break;
         case EXTERN_F:
             for (i = 1; i < *sc; i++) {
                 if (!strcmp(symbol_table_type[i], EXTERN))
-                    fprintf(f, "%s %d", symbol_table_label[i], symbol_table_address[i]);
+                    fprintf(f, "%s %d\n", symbol_table_label[i], symbol_table_address[i]);
             }
             break;
         case ENTRY_F:
             for (i = 1; i < *sc; i++) {
                 if (!strcmp(symbol_table_type[i], ENTRY))
-                    fprintf(f, "%s %d", symbol_table_label[i], symbol_table_address[i]);
+                    fprintf(f, "%s %d\n", symbol_table_label[i], symbol_table_address[i]);
             }
             break;
     }
@@ -106,13 +105,21 @@ int is_label_exist(char *label) {
     return 0;
 }
 
-void update_words_addresses(int only_data_table, int delta) {
+void update_words_addresses(int instructions_only, int program_offset) {
     int i;
-    if (!only_data_table)
+    if (instructions_only) {
         for (i = 1; i <= *ic; i++)
-            instructions_table_address[i] += delta;
+            instructions_table_address[i] += program_offset;
+        return;
+    }
     for (i = 1; i <= *dc; i++)
-        data_table_address[i] += delta;
+        data_table_address[i] += (*ic) + program_offset;
+    for (i = 1; i <= *sc; i++) {
+        if (!strcmp(symbol_table_type[i], OPERATION))
+            symbol_table_address[i] += program_offset;
+        else if (!strcmp(symbol_table_type[i], DATA))
+            symbol_table_address[i] += (*ic) + program_offset;
+    }
 }
 
 void change_to_entry(char *label) {

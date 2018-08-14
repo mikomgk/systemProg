@@ -79,10 +79,10 @@ int main(int argc, char *argv[]) {
                             /*too many operands*/
                             insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
                         } else {
-                            for (operandA = strtok(operandA, ","); *operandA; operandA = strtok(NULL, ",")) {
+                            for (operandA = strtok(operandA, ","); operandA&&*operandA; operandA = strtok(NULL, ",")) {
                                 /*separates each number*/
                                 number = strtol(operandA, &operandB, 10);
-                                if (operandB) {
+                                if (*operandB) {
                                     /*not an int*/
                                     insert_error_message(ERR_INVALID_INTEGER);
                                     break;
@@ -112,9 +112,10 @@ int main(int argc, char *argv[]) {
                             /*missing QM"*/
                             insert_error_message(ERR_MISSING_QUOTATION_MARK);
                         } else
-                            for (operandA++; *(operandA + 1); operandA++) {
-                                /*ignoring leading and finish quotation marks*/
-                                dec2bin(*operandA, binary_word, WORD_SIZE);
+                            /*ignoring leading quotation mark*/
+                            for (operandA++; *operandA; operandA++) {
+                                /*changing ending quotation mark to 0*/
+                                dec2bin(*operandA == '\"' ? 0 : *operandA, binary_word, WORD_SIZE);
                                 replace_line(DATA_T, 0, binary_word, NULL);
                             }
                     } else if (!strcmp((operation + 1), ENTRY)) {
@@ -144,9 +145,9 @@ int main(int argc, char *argv[]) {
                 } else {
                     /*operation line*/
                     if (label_ok_flag && !label_exist_flag)
-                        replace_line(SYMBOL_T, *dc, label, OPERATION);
+                        replace_line(SYMBOL_T, *ic, label, OPERATION);
                     if ((tmp = (char *) mapping(operation, op_names, (void **) op_code)))
-                        strcpy(binary_word + OPERATION_CODE_INDEX, tmp);
+                        strncpy(binary_word + OPERATION_CODE_INDEX, tmp,OP_CODE_LENGTH);
                     else {
                         if (!has_label_flag && is_label_ok(operation, 0,0))
                             /*operation name is missing*/
@@ -179,6 +180,7 @@ int main(int argc, char *argv[]) {
                             /*number_of_operators assigned to -1 in parse() if there's another word after operandB*/
                             if (number_of_operators == 0)
                                 number_of_operators = 2;
+                            break;
                         default:
                             number_of_operators = -1;
                     }
@@ -203,6 +205,7 @@ int main(int argc, char *argv[]) {
                                 write_operand_addressing(NULL, operandA, binary_word, PARAMETER1_INDEX, NULL);
                                 write_operand_addressing(NULL, operandB, binary_word, PARAMETER2_INDEX, NULL);
                                 number_of_extra_words++;
+                                number_of_operators=2;
                             }
                         }
                         replace_line(INSTRUCTIONS_T, 0, binary_word, NULL);
@@ -213,7 +216,7 @@ int main(int argc, char *argv[]) {
             }
             if (!error_flag) {
                 /*there is no error*/
-                update_words_addresses(1, *ic);
+                update_words_addresses(0,ADDRESS_OFFSET);
                 fseek(fp, 0, SEEK_SET);
                 *ic = 0;
                 /*second round*/
@@ -224,6 +227,9 @@ int main(int argc, char *argv[]) {
                     reset_binary_word(binary_word);
                     strcpy(trimmed_line, original_line);
                     trim(trimmed_line, 0);
+                    if (strlen(trimmed_line) == 0 || trimmed_line[0] == ';')
+                        /*empty line or comment line*/
+                        continue;
                     parse(trimmed_line, &label, &operation, &operandA, &operandB);
                     if (*operation == '.') {
                         /*directive line*/
@@ -245,15 +251,15 @@ int main(int argc, char *argv[]) {
                     }
                     /*increase IC to effect the extra word and not the instruction word*/
                     (*ic)++;
-                    if (addressing_type_2_flag) {
+                    if (addressing_type_2_flag && is_label_exist(addressing_type_2_jumping_label)) {
                         /*write label word of addressing type 2 if needed*/
                         reset_binary_word(binary_word);
                         dec2bin(get_symbol_address(addressing_type_2_jumping_label), binary_word, NUMBER_SIZE);
-                        strcpy(binary_word + ARE_INDEX, mapping(is_external(addressing_type_2_jumping_label) ? EXTERNAL : RELOCATABLE, are, (void **) are_code));
+                        strncpy(binary_word + ARE_INDEX, mapping(is_external(addressing_type_2_jumping_label) ? EXTERNAL : RELOCATABLE, are, (void **) are_code),ARE_CODE_LENGTH);
                         replace_line(INSTRUCTIONS_T, 0, binary_word, NULL);
                     }
                     for (i = 1; i <= number_of_operators; i++) {
-                        /*write parameters*/
+                        /*write parameters - extra words*/
                         is_first_operator = i == 1;
                         is_source_operand = number_of_operators == 2 && is_first_operator;
                         if (number_of_registers == 2) {
@@ -275,6 +281,7 @@ int main(int argc, char *argv[]) {
             /*writes errors to stderr*/
             write_errors(*argv);
         } else {
+            update_words_addresses(1,ADDRESS_OFFSET);
             /*create and write files*/
             n_file = new_file(file_name, file_extension, OBJECT_EXTENSION);
             write_table_to_file(n_file, OBJECT_F);

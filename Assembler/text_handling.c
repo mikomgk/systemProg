@@ -37,8 +37,8 @@ int trim(char *word, int in_brackets) {
 }
 
 int parse(char *trimmed_line, char **label, char **operation, char **operandA, char **operandB) {
-    int count_spaces = 0, count_commas = 0, special_char = 0;
-    char *pnt = trimmed_line, *tmp = NULL;
+    int count_spaces = 0, count_commas = 0, is_string = 0, is_brackets = 0, is_data = 0;
+    char *pnt = trimmed_line, *tmp = NULL, *is_operation = NULL;
     *label = NULL;
     *operation = NULL;
     *operandA = NULL;
@@ -54,12 +54,17 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
                 insert_error_message(ERR_TOO_MANY_COMMAS);
                 count_commas--;
             }
-        } else if (*pnt == '(' || *pnt == '\"') {
-            special_char = 1;
+        } else if (*pnt == '(') {
+            /*operandA has brackets*/
+            is_brackets = 1;
+            break;
+        } else if (*pnt == '\"') {
+            /*operandA is string*/
+            is_string = 1;
             break;
         } else if (count_spaces > 1 && *(pnt - 1) == ' ' && isdigit(*pnt)) {
             /*operandA is numbers array*/
-            special_char = 1;
+            is_data = 1;
             break;
         }
     }
@@ -72,7 +77,7 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
         insert_error_message(ERR_MISSING_COMMA);
         return 0;
     } else if (count_spaces == 1) {
-        /*no label*/
+        /*only two words*/
         *operation = strtok(trimmed_line, " ");
     } else if (count_spaces == 2) {
         /*yes label*/
@@ -80,19 +85,22 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
         *operation = strtok(NULL, " ");
         has_label_flag = 1;
     }
-    *operandA = strtok(NULL, special_char ? "\0" : ",");
-    if (**operandA == '\"') {
-        /*in a string*/
-        for (tmp = *(operandA + 1); *tmp != '\"'; tmp++)
-            /**/;
-        tmp++;
+    *operandA = strtok(NULL, is_string || is_brackets || is_data ? "\0" : ",");
+    if (is_string || is_brackets) {
+        tmp = strchr((*operandA) + (is_string ? 1 : 0), is_string ? '\"' : ')') + 1;
     } else {
         if (!isdigit(**operandA))
             /*operandA is not .data input*/
             *operandB = strtok(NULL, ",");
-        tmp = strtok(NULL, " ");
+        tmp = strtok(NULL, ",");
     }
-    if (tmp) {
+    if (count_spaces == 1 && (is_operation = mapping(*operandA, op_names, (void **) num_of_operands_per_op)) && atoi(is_operation) == 0) {
+        *label = *operation;
+        *operation = *operandA;
+        *operandA = NULL;
+        tmp = tmp ? tmp : *operandB;
+    }
+    if (tmp && *tmp) {
         /*there's an extra parameter*/
         insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
         number_of_operators = -1;
@@ -102,14 +110,17 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
 }
 
 int parse_addressing_type_2_parameters(char *original_operand, char **addressing_type_2_jumping_label, char **parameterA, char **parameterB) {
+    char *pnt;
     *addressing_type_2_jumping_label = strtok(original_operand, "(");
     *parameterA = strtok(NULL, ",");
     *parameterB = strtok(NULL, ")");
     if (!*addressing_type_2_jumping_label || !*parameterA || !*parameterB)
         return 0;
-    for (; **parameterB; (*parameterB)++)
+    /*go to last character to check*/
+    for (pnt=*parameterB; *pnt; pnt++)
         /**/;
-    if (*(--(*parameterB)) != ')')
+    if (*(++pnt))
+        /*last character is not )*/
         return 0;
     return 1;
 }
