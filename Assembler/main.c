@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
                             continue;
                         }
                         if (label_ok_flag && !label_exist_flag)
-                            replace_line(SYMBOL_T, *dc, label, DATA);
+                            insert_line(SYMBOL_T, *dc, label, DATA);
                         if (operandB) {
                             /*too many operands*/
                             insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
                                 } else {
                                     /*insert binary number*/
                                     dec2bin(number, binary_word, WORD_SIZE);
-                                    replace_line(DATA_T, 0, binary_word, NULL);
+                                    insert_line(DATA_T, 0, binary_word, NULL);
                                 }
                             }
                         }
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
                             continue;
                         }
                         if (label_ok_flag && !label_exist_flag)
-                            replace_line(SYMBOL_T, *dc, label, DATA);
+                            insert_line(SYMBOL_T, *dc, label, DATA);
                         if (operandB) {
                             /*too many operands*/
                             insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
@@ -120,16 +120,16 @@ int main(int argc, char *argv[]) {
                             for (operandA++; *operandA; operandA++) {
                                 /*changing ending quotation mark to 0*/
                                 dec2bin(*operandA == '\"' ? 0 : *operandA, binary_word, WORD_SIZE);
-                                replace_line(DATA_T, 0, binary_word, NULL);
+                                insert_line(DATA_T, 0, binary_word, NULL);
                             }
                     } else if (!strcmp((operation + 1), ENTRY)) {
                         /*.entry line*/
                         if (has_label_flag)
-                            replace_line(ERROR_T, LC, ALERT_LABEL_MEANINGLESS, original_line);
+                            insert_line(ERROR_T, LC, ALERT_LABEL_MEANINGLESS, original_line);
                     } else if (!strcmp((operation + 1), EXTERN)) {
                         /*.extern line*/
                         if (has_label_flag)
-                            replace_line(ERROR_T, LC, ALERT_LABEL_MEANINGLESS, original_line);
+                            insert_line(ERROR_T, LC, ALERT_LABEL_MEANINGLESS, original_line);
                         if (operandB) {
                             /*too many operands*/
                             insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
                             /*label already exist*/
                             insert_error_message(ERR_LABEL_NAME_ALREADY_IN_USE);
                         } else {
-                            replace_line(SYMBOL_T, 0, operandA, EXTERN);
+                            insert_line(SYMBOL_T, 0, operandA, EXTERN);
                         }
                     } else {
                         /*wrong directive name*/
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
                 } else {
                     /*operation line*/
                     if (label_ok_flag && !label_exist_flag)
-                        replace_line(SYMBOL_T, *ic, label, OPERATION);
+                        insert_line(SYMBOL_T, *ic, label, OPERATION);
                     if ((tmp = (char *) mapping(operation, op_names, (void **) op_code)))
                         strncpy(binary_word + OPERATION_CODE_INDEX, tmp,OP_CODE_LENGTH);
                     else {
@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
                                 number_of_operators = -1;
                             } else {
                                 number_of_operators = 0;
-                                replace_line(INSTRUCTIONS_T, 0, binary_word, NULL);
+                                insert_line(INSTRUCTIONS_T, 0, binary_word, NULL);
                             }
                             break;
                         case 1:
@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
                                 number_of_operators=2;
                             }
                         }
-                        replace_line(INSTRUCTIONS_T, 0, binary_word, NULL);
+                        insert_line(INSTRUCTIONS_T, 0, binary_word, NULL);
                         number_of_extra_words = number_of_extra_words + number_of_operators - (number_of_registers == 2 ? 1 : 0);
                         *ic += number_of_extra_words;
                     }
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
                         reset_binary_word(binary_word);
                         dec2bin(get_symbol_address(addressing_type_2_jumping_label), binary_word, NUMBER_SIZE);
                         strncpy(binary_word + ARE_INDEX, mapping(is_external(addressing_type_2_jumping_label) ? EXTERNAL : RELOCATABLE, are, (void **) are_code),ARE_CODE_LENGTH);
-                        replace_line(INSTRUCTIONS_T, 0, binary_word, NULL);
+                        insert_line(INSTRUCTIONS_T, 0, binary_word, NULL);
                     }
                     for (i = 1; i <= number_of_operators; i++) {
                         /*write parameters - extra words*/
@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
                             write_parameter_binary_word(binary_word, is_first_operator ? operandA : operandB, atoi(is_first_operator ? operandA_type : operandB_type), NULL,
                                                         is_source_operand ? 0 : 1);
                         /*insert word to table*/
-                        replace_line(INSTRUCTIONS_T, 0, binary_word, NULL);
+                        insert_line(INSTRUCTIONS_T, 0, binary_word, NULL);
                     }
                 }
             }
@@ -295,17 +295,18 @@ int main(int argc, char *argv[]) {
 }
 
 void write_output_files() {
-    FILE *output_file=NULL;
+    FILE *output_file = NULL;
+    /*write each table to  file*/
     write_new_file(output_file, OBJECT_EXTENSION, OBJECT_F);
     write_new_file(output_file, ENTRY_EXTENSION, ENTRY_F);
     write_new_file(output_file, EXTERN_EXTENSION, EXTERN_F);
 }
 
 void write_new_file(FILE *f, char *new_extension, enum files file_type) {
+    /*creates a new file with the given extension*/
     strcpy(file_extension, new_extension);
     if ((f = fopen(file_name, "w")) == NULL)
         insert_error_message(ERR_CAN_NOT_CREATE_FILE);
     write_table_to_file(f, file_type);
     fclose(f);
-    f = NULL;
 }

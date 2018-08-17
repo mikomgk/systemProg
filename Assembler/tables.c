@@ -37,7 +37,7 @@ void clear_tables() {
     }
 }
 
-void replace_line(enum tables table, int int_data, char *string_data, char *string_data2) {
+void insert_line(enum tables table, int int_data, char *string_data, char *string_data2) {
     int line;
     switch (table) {
         case INSTRUCTIONS_T:
@@ -159,5 +159,5 @@ int is_external(char *label) {
 
 void add_extern_occurrence(char *label) {
     if (is_external(label))
-        replace_line(SYMBOL_T, *ic, label, EXTERN);
+        insert_line(SYMBOL_T, *ic, label, EXTERN);
 }

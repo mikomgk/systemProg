@@ -86,15 +86,14 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
         has_label_flag = 1;
     }
     *operandA = strtok(NULL, is_string || is_brackets || is_data ? "\0" : ",");
-    if (is_string || is_brackets) {
-        tmp = strchr((*operandA) + (is_string ? 1 : 0), is_string ? '\"' : ')') + 1;
-    } else {
+    if (!is_string && !is_brackets) {
         if (!isdigit(**operandA))
             /*operandA is not .data input*/
             *operandB = strtok(NULL, ",");
         tmp = strtok(NULL, ",");
     }
     if (count_spaces == 1 && (is_operation = mapping(*operandA, op_names, (void **) num_of_operands_per_op)) && atoi(is_operation) == 0) {
+        /*operation with no operands*/
         *label = *operation;
         *operation = *operandA;
         *operandA = NULL;
@@ -115,6 +114,7 @@ int parse_addressing_type_2_parameters(char *original_operand, char **addressing
     *parameterA = strtok(NULL, ",");
     *parameterB = strtok(NULL, ")");
     if (!*addressing_type_2_jumping_label || !*parameterA || !*parameterB)
+        /*bad format*/
         return 0;
     /*go to last character to check*/
     for (pnt=*parameterB; *pnt; pnt++)

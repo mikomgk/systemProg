@@ -34,7 +34,7 @@ char *get_addressing_type(char *operand) {
     return LABEL_ADDRESSING;
 }
 
-void write_operand_addressing(char *operation, char *operand, char *binary_word, int operandBinaryIndex, char ***operand_addressing_types_per_op) {
+void write_operand_addressing(char *operation, char *operand, char *binary_word, int operand_binary_index, char ***operand_addressing_types_per_op) {
     char *operand_type, **addressing_options, *tmp;
     if (!operand)
         /*no operand - do nothing*/
@@ -51,7 +51,7 @@ void write_operand_addressing(char *operation, char *operand, char *binary_word,
     if (mapping(operand_type, addressing_options, (void **) addressing_options) || !operation) {
         /*correct addressing type*/
         if ((tmp = (char *) mapping(operand_type, addressing_types, (void **) addressing_types_code)))
-            strncpy(binary_word + operandBinaryIndex, tmp,ADDRESSING_CODE_LENGTH);
+            strncpy(binary_word + operand_binary_index, tmp,ADDRESSING_CODE_LENGTH);
     } else
         /*wrong addressing type*/
         insert_error_message(ERR_ADDRESSING_MODE_IS_NOT_COMPATIBLE);
@@ -106,6 +106,6 @@ void reset_binary_word(char *binary_word) {
 }
 
 void insert_error_message(char *error_message) {
-    replace_line(ERROR_T, LC, error_message, original_line);
+    insert_line(ERROR_T, LC, error_message, original_line);
     error_flag = 1;
 }
