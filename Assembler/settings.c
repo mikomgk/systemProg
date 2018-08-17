@@ -39,13 +39,13 @@ char *errors[] = {
         "ERROR: label name is not exist",
         "ERROR: wrong operation name",
         "ERROR: addressing mode is not compatible with the given operation",
-        "ERROR: number is too big",
+        "ERROR: number is out of range",
         "ERROR: missing operation name",
         "ERROR: invalid integer",
         "ERROR: label name is too long",
         "ERROR: can't open file",
         "ERROR: not an assembly file",
-        ""
+        "ERROR: can't create file"
 };
 
 char *alerts[] = {

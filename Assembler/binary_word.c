@@ -73,27 +73,28 @@ void write_parameter_binary_word(char *binary_word, char *operand, int operand_t
                 insert_error_message(ERR_INVALID_INTEGER);
                 return;
             }
-            if (number > biggest_short_number) {
-                insert_error_message(ERR_NUMBER_IS_TOO_BIG);
+            if (number > biggest_short_number || number < smallest_short_number) {
+                insert_error_message(ERR_NUMBER_IS_OUT_OF_RANGE);
                 return;
             }
             dec2bin(number, binary_word, NUMBER_SIZE);
             break;
         case 1:
+            add_extern_occurrence(operand);
             number = get_symbol_address(operand);
             if (number == -1)
                 insert_error_message(ERR_LABEL_NAME_IS_NOT_EXIST);
             else {
                 dec2bin(number, binary_word, NUMBER_SIZE);
                 strncpy(binary_word + ARE_INDEX, mapping(is_external(operand)
-                                                        ? EXTERNAL
-                                                        : RELOCATABLE, are, (void **) are_code),ARE_CODE_LENGTH);
+                                                         ? EXTERNAL
+                                                         : RELOCATABLE, are, (void **) are_code), ARE_CODE_LENGTH);
             }
             break;
         case 3:
             strncpy(binary_word + (is_destination_operand
-                                  ? DESTINATION_REGISTER_INDEX
-                                  : SOURCE_REGISTER_INDEX), mapping(operand, register_names, (void **) register_code),REGISTER_CODE_LENGTH);
+                                   ? DESTINATION_REGISTER_INDEX
+                                   : SOURCE_REGISTER_INDEX), mapping(operand, register_names, (void **) register_code), REGISTER_CODE_LENGTH);
             break;
     }
 }
@@ -107,18 +108,4 @@ void reset_binary_word(char *binary_word) {
 void insert_error_message(char *error_message) {
     replace_line(ERROR_T, LC, error_message, original_line);
     error_flag = 1;
-}
-
-int biggest_number(int num_of_binary_digits) {
-    int i = 0, sum = 0;
-    for (; i < num_of_binary_digits; i++)
-        sum += pow(2, i);
-    return sum;
-}
-
-int pow(int x, int y) {
-    int sum = 1, i;
-    for (i = 0; i < y; i++)
-        sum *= x;
-    return sum;
 }

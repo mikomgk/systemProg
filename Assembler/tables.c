@@ -82,15 +82,15 @@ void write_table_to_file(FILE *f, enum files file_type) {
             }
             break;
         case EXTERN_F:
-            for (i = 1; i < *sc; i++) {
-                if (!strcmp(symbol_table_type[i], EXTERN))
-                    fprintf(f, "%s %d\n", symbol_table_label[i], symbol_table_address[i]);
+            for (i = 1; i <= *sc; i++) {
+                if (!strcmp(symbol_table_type[i], EXTERN) && symbol_table_address[i]!=0)
+                    fprintf(f, "%s\t%d\n", symbol_table_label[i], symbol_table_address[i]);
             }
             break;
         case ENTRY_F:
-            for (i = 1; i < *sc; i++) {
+            for (i = 1; i <= *sc; i++) {
                 if (!strcmp(symbol_table_type[i], ENTRY))
-                    fprintf(f, "%s %d\n", symbol_table_label[i], symbol_table_address[i]);
+                    fprintf(f, "%s\t%d\n", symbol_table_label[i], symbol_table_address[i]);
             }
             break;
     }
@@ -110,6 +110,9 @@ void update_words_addresses(int instructions_only, int program_offset) {
     if (instructions_only) {
         for (i = 1; i <= *ic; i++)
             instructions_table_address[i] += program_offset;
+        for(i=1;i<=*sc;i++)
+            if(!strcmp(symbol_table_type[i], EXTERN) && symbol_table_address[i]!=0)
+                symbol_table_address[i]+=program_offset;
         return;
     }
     for (i = 1; i <= *dc; i++)
@@ -152,4 +155,9 @@ int is_external(char *label) {
             return !strcmp(symbol_table_type[i], EXTERN);
         }
     return 0;
+}
+
+void add_extern_occurrence(char *label) {
+    if (is_external(label))
+        replace_line(SYMBOL_T, *ic, label, EXTERN);
 }

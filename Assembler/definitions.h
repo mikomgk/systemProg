@@ -60,15 +60,16 @@
 #define ERR_LABEL_NAME_IS_NOT_EXIST errors[11]
 #define ERR_WRONG_OPERATION_NAME errors[12]
 #define ERR_ADDRESSING_MODE_IS_NOT_COMPATIBLE errors[13]
-#define ERR_NUMBER_IS_TOO_BIG errors[14]
+#define ERR_NUMBER_IS_OUT_OF_RANGE errors[14]
 #define ERR_MISSING_OPERATION_NAME errors[15]
 #define ERR_INVALID_INTEGER errors[16]
 #define ERR_LABEL_NAME_IS_TOO_LONG errors[17]
 #define ERR_CAN_NOT_OPEN_FILE errors[18]
 #define ERR_NOT_AN_ASSEMBLY_FILE errors[19]
+#define ERR_CAN_NOT_CREATE_FILE errors[20]
 #define ALERT_LABEL_MEANINGLESS alerts[1]
 
-extern int error_flag, biggest_long_number, biggest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, number_of_operators, LC;
-extern char original_line[LINE_SIZE], assembler_name[LABEL_SIZE];
+extern int error_flag, biggest_long_number, biggest_short_number, smallest_long_number, smallest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, number_of_operators, LC;
+extern char original_line[LINE_SIZE], assembler_name[LABEL_SIZE], file_name[FILENAME_MAX], *file_extension;
 
 #endif /*ASSEMBLER_DEFINITIONS_H*/

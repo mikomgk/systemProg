@@ -1,14 +1,16 @@
 #include "definitions.h"
 
-FILE *new_file(char *file_name, char *file_extension, char *new_extension);
+void write_new_file(FILE *f, char *new_extension, enum files file_type);
+void write_output_files();
 
-int error_flag, biggest_long_number, biggest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, number_of_operators, LC;
-char original_line[LINE_SIZE], assembler_name[LABEL_SIZE];
+int error_flag, biggest_long_number, biggest_short_number, smallest_long_number, smallest_short_number,has_label_flag, addressing_type_2_flag, number_of_registers,
+number_of_operators, LC;
+char original_line[LINE_SIZE], assembler_name[LABEL_SIZE], file_name[FILENAME_MAX], *file_extension = NULL;
 
 int main(int argc, char *argv[]) {
-    FILE *fp, *n_file;
+    FILE *fp;
     char trimmed_line[LINE_SIZE], *label = NULL, *operation = NULL, *operandA = NULL, *operandB = NULL, binary_word[WORD_SIZE], *tmp = NULL, *operandA_type = NULL,
-            *operandB_type = NULL, *addressing_type_2_jumping_label = NULL, file_name[FILENAME_MAX], *file_extension = NULL;
+            *operandB_type = NULL, *addressing_type_2_jumping_label = NULL;
     int label_exist_flag, label_ok_flag, parsed_ok_flag, number_of_extra_words, is_first_operator,
             is_source_operand, i;
     long number;
@@ -17,8 +19,10 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "%s: ERROR: no input files", assembler_name);
         return 0;
     }
-    biggest_long_number = biggest_number(WORD_SIZE);
-    biggest_short_number = biggest_number(NUMBER_SIZE);
+    smallest_long_number = -1<<WORD_SIZE-1;
+    biggest_long_number = ~ smallest_long_number;
+    smallest_short_number = -1<<NUMBER_SIZE-1;
+    biggest_short_number = ~ smallest_short_number;
     while (--argc > 0) {
         strcpy(file_name, *++argv);
         if ((file_extension = strchr(file_name, '.')) == NULL || strcmp(file_extension, ASSEMBLY_EXTENSION)) {
@@ -86,9 +90,9 @@ int main(int argc, char *argv[]) {
                                     /*not an int*/
                                     insert_error_message(ERR_INVALID_INTEGER);
                                     break;
-                                } else if (number > biggest_long_number) {
-                                    /*number is too big*/
-                                    insert_error_message(ERR_NUMBER_IS_TOO_BIG);
+                                } else if (number > biggest_long_number || number < smallest_long_number) {
+                                    /*number is out of range*/
+                                    insert_error_message(ERR_NUMBER_IS_OUT_OF_RANGE);
                                 } else {
                                     /*insert binary number*/
                                     dec2bin(number, binary_word, WORD_SIZE);
@@ -253,6 +257,7 @@ int main(int argc, char *argv[]) {
                     (*ic)++;
                     if (addressing_type_2_flag && is_label_exist(addressing_type_2_jumping_label)) {
                         /*write label word of addressing type 2 if needed*/
+                        add_extern_occurrence(addressing_type_2_jumping_label);
                         reset_binary_word(binary_word);
                         dec2bin(get_symbol_address(addressing_type_2_jumping_label), binary_word, NUMBER_SIZE);
                         strncpy(binary_word + ARE_INDEX, mapping(is_external(addressing_type_2_jumping_label) ? EXTERNAL : RELOCATABLE, are, (void **) are_code),ARE_CODE_LENGTH);
@@ -283,21 +288,24 @@ int main(int argc, char *argv[]) {
         } else {
             update_words_addresses(1,ADDRESS_OFFSET);
             /*create and write files*/
-            n_file = new_file(file_name, file_extension, OBJECT_EXTENSION);
-            write_table_to_file(n_file, OBJECT_F);
-            fclose(n_file);
-            n_file = new_file(file_name, file_extension, ENTRY_EXTENSION);
-            write_table_to_file(n_file, ENTRY_F);
-            fclose(n_file);
-            n_file = new_file(file_name, file_extension, EXTERN_EXTENSION);
-            write_table_to_file(n_file, EXTERN_F);
-            fclose(n_file);
+            write_output_files();
         }
     }
     return 0;
 }
 
-FILE *new_file(char *file_name, char *file_extension, char *new_extension) {
+void write_output_files() {
+    FILE *output_file=NULL;
+    write_new_file(output_file, OBJECT_EXTENSION, OBJECT_F);
+    write_new_file(output_file, ENTRY_EXTENSION, ENTRY_F);
+    write_new_file(output_file, EXTERN_EXTENSION, EXTERN_F);
+}
+
+void write_new_file(FILE *f, char *new_extension, enum files file_type) {
     strcpy(file_extension, new_extension);
-    return fopen(file_name, "w");
+    if ((f = fopen(file_name, "w")) == NULL)
+        insert_error_message(ERR_CAN_NOT_CREATE_FILE);
+    write_table_to_file(f, file_type);
+    fclose(f);
+    f = NULL;
 }

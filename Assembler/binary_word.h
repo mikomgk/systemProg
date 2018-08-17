@@ -10,7 +10,5 @@ void write_operand_addressing(char *operation, char *operand, char *binary_word,
 void write_parameter_binary_word(char *binary_word, char *operand, int operand_type, char *option_operandB, int is_destination_operand);
 void reset_binary_word(char *binary_word);
 void insert_error_message(char *error_message);
-int biggest_number(int num_of_binary_digits);
-int pow(int x, int y);
 
 #endif /*ASSEMBLER_BINARY_WORD_H*/

@@ -45,7 +45,7 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
     *operandB = NULL;
     /*count spaces and commas*/
     for (; *pnt; pnt++) {
-        if (*pnt == ' ')
+        if (!is_brackets&&!is_string&&!is_data&&*pnt == ' ')
             count_spaces++;
         else if (*pnt == ',') {
             count_commas++;
@@ -57,15 +57,12 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
         } else if (*pnt == '(') {
             /*operandA has brackets*/
             is_brackets = 1;
-            break;
         } else if (*pnt == '\"') {
             /*operandA is string*/
             is_string = 1;
-            break;
         } else if (count_spaces > 1 && *(pnt - 1) == ' ' && isdigit(*pnt)) {
             /*operandA is numbers array*/
             is_data = 1;
-            break;
         }
     }
     if (count_spaces == 0) {
@@ -73,8 +70,11 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
         insert_error_message(count_commas ? ERR_TOO_MANY_COMMAS : ERR_WRONG_NUMBER_OF_OPERATORS);
         return 0;
     } else if (count_spaces > 2) {
-        /*too many spaces*/
-        insert_error_message(ERR_MISSING_COMMA);
+        if (is_brackets && count_commas == 1)
+            insert_error_message(ERR_SPACE_BETWEEN_PARAMS);
+        else
+            /*too many spaces*/
+            insert_error_message(ERR_MISSING_COMMA);
         return 0;
     } else if (count_spaces == 1) {
         /*only two words*/
