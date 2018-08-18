@@ -1,37 +1,39 @@
 #include "definitions.h"
 
 void write_new_file(FILE *f, char *new_extension, enum files file_type);
+
 void write_output_files();
 
-int error_flag, biggest_long_number, biggest_short_number, smallest_long_number, smallest_short_number,has_label_flag, addressing_type_2_flag, number_of_registers,
-number_of_operators, LC;
+int error_flag, biggest_long_number, biggest_short_number, smallest_long_number, smallest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers,
+        number_of_operators, LC;
 char original_line[LINE_SIZE], assembler_name[LABEL_SIZE], file_name[FILENAME_MAX], *file_extension = NULL;
 
 int main(int argc, char *argv[]) {
     FILE *fp;
-    char trimmed_line[LINE_SIZE], *label = NULL, *operation = NULL, *operandA = NULL, *operandB = NULL, binary_word[WORD_SIZE], *tmp = NULL, *operandA_type = NULL,
+    char trimmed_line[LINE_SIZE], *label = NULL, *operation = NULL, *operandA = NULL, *operandB = NULL, binary_word[WORD_SIZE+1], *tmp = NULL, *operandA_type = NULL,
             *operandB_type = NULL, *addressing_type_2_jumping_label = NULL;
     int label_exist_flag, label_ok_flag, parsed_ok_flag, number_of_extra_words, is_first_operator,
             is_source_operand, i;
     long number;
     strcpy(assembler_name, (tmp = strrchr(*argv, '/')) ? tmp + 1 : *argv);
     if (argc == 1) {
-        fprintf(stderr, "%s: ERROR: no input files", assembler_name);
+        fprintf(stderr, "%s: %s\n", assembler_name,ERR_NO_INPUT_FILES);
         return 0;
     }
-    smallest_long_number = -1<<WORD_SIZE-1;
-    biggest_long_number = ~ smallest_long_number;
-    smallest_short_number = -1<<NUMBER_SIZE-1;
-    biggest_short_number = ~ smallest_short_number;
+    smallest_long_number = -1 << (WORD_SIZE - 1);
+    biggest_long_number = ~smallest_long_number;
+    smallest_short_number = -1 << (NUMBER_SIZE - 1);
+    biggest_short_number = ~smallest_short_number;
     while (--argc > 0) {
         strcpy(file_name, *++argv);
         if ((file_extension = strchr(file_name, '.')) == NULL || strcmp(file_extension, ASSEMBLY_EXTENSION)) {
             /*not an assembly file*/
-            insert_error_message(ERR_NOT_AN_ASSEMBLY_FILE);
+            fprintf(stderr, "%s: %s\n", assembler_name,ERR_NOT_AN_ASSEMBLY_FILE);
             continue;
         }
         if ((fp = fopen(*argv, "r")) == NULL) {
             /*file not open*/
+            original_line[0] = '\0';
             insert_error_message(ERR_CAN_NOT_OPEN_FILE);
         } else {
             /*file open*/
@@ -61,7 +63,7 @@ int main(int argc, char *argv[]) {
                 if (!parsed_ok_flag)
                     /*didn't parse*/
                     continue;
-                if (label) {
+                if (label && !(*operation == '.' && (!strcmp(operation + 1, EXTERN) || !strcmp(operation + 1, ENTRY)))) {
                     /*checks if label already exist*/
                     label_ok_flag = is_label_ok(label, 1, 0);
                     if ((label_exist_flag = has_label_flag ? is_label_exist(label) : 0)) {
@@ -90,7 +92,7 @@ int main(int argc, char *argv[]) {
                                     if (*operandB == ' ') {
                                         /*space  between params*/
                                         insert_error_message(ERR_MISSING_COMMA);
-                                        strtok(operandA," ");
+                                        strtok(operandA, " ");
                                     } else {
                                         /*not an int*/
                                         insert_error_message(ERR_INVALID_INTEGER);
@@ -184,8 +186,12 @@ int main(int argc, char *argv[]) {
                             break;
                         case 2:
                             /*number_of_operators assigned to -1 in parse() if there's another word after operandB*/
-                            if (number_of_operators == 0)
+                            if (number_of_operators == 0 && operandB)
                                 number_of_operators = 2;
+                            else {
+                                insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
+                                number_of_operators = -1;
+                            }
                             break;
                         default:
                             number_of_operators = -1;

@@ -1,4 +1,3 @@
-//#include <math.h>
 #include "binary_word.h"
 
 void *mapping(char *word, char *words[], void *params[]) {
@@ -103,6 +102,7 @@ void reset_binary_word(char *binary_word) {
     int i = 0;
     for (; i < WORD_SIZE; i++)
         *binary_word++ = '.';
+    *binary_word = '\0';
 }
 
 void insert_error_message(char *error_message) {

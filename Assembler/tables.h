@@ -21,7 +21,7 @@ void clear_tables();
 
 /*
  * inserts string_data into table table in the next line
- * if table is INSTRUCTIONS_T or DATA_T next line line is *ic/*dc +1
+ * if table is INSTRUCTIONS_T or DATA_T next line line is *ic / *dc +1
  * when finish increases *ic and *dc
  * if table is SYMBOL_T int_data is label address and string_data2 is label type
  * if table is ERROR_T int_data is line number and string_data2 is original line from file

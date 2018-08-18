@@ -176,7 +176,7 @@ int is_label_ok(char *label, int print_error, int is_extern) {
 
 int is_string_ok(char *string) {
     int is_error = 0;
-    char *ptr = NULL, *last_Qmark;
+    char *last_Qmark;
     if (*string != '\"') {
         /*no leading quotation mark*/
         insert_error_message(ERR_MISSING_QUOTATION_MARK);

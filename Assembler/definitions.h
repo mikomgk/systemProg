@@ -66,6 +66,7 @@
 #define ERR_CAN_NOT_OPEN_FILE errors[17]
 #define ERR_NOT_AN_ASSEMBLY_FILE errors[18]
 #define ERR_CAN_NOT_CREATE_FILE errors[19]
+#define ERR_NO_INPUT_FILES errors[20]
 #define WARNING_LABEL_MEANINGLESS warnings[0]
 
 extern int error_flag, biggest_long_number, biggest_short_number, smallest_long_number, smallest_short_number, has_label_flag, addressing_type_2_flag, number_of_registers, number_of_operators, LC;
