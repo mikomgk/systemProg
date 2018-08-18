@@ -21,6 +21,6 @@ extern char *are_code[];
 extern char *directives[];
 extern char *directives_number[];
 extern char *errors[];
-extern char *alerts[];
+extern char *warnings[];
 
 #endif /*ASSEMBLER_SETTINGS_H*/

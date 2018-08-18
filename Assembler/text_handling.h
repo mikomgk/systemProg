@@ -42,6 +42,7 @@ int is_label_ok(char *label, int print_error, int is_extern);
 
 /*
  * returns 1 if string starts and terminates with ", otherwise 0
+ * handling errors
  */
 int is_string_ok(char *string);
 

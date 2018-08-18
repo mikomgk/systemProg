@@ -53,6 +53,7 @@ int get_symbol_address(char *label);
 
 /*
  * write all errors to stderr
+ * if there are no errors - do nothing
  */
 void write_errors(char *file_name);
 

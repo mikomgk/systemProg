@@ -30,7 +30,7 @@ char *errors[] = {
         "ERROR: too many commas",
         "ERROR: directive line must have a label",
         "ERROR: missing quotation mark",
-        "ERROR: too many quotation marks",
+        "ERROR: label name is too long",
         "ERROR: wrong number of operators",
         "ERROR: label name is not allowed",
         "ERROR: label name is already in use",
@@ -42,12 +42,11 @@ char *errors[] = {
         "ERROR: number is out of range",
         "ERROR: missing operation name",
         "ERROR: invalid integer",
-        "ERROR: label name is too long",
         "ERROR: can't open file",
         "ERROR: not an assembly file",
         "ERROR: can't create file"
 };
 
-char *alerts[] = {
-        "ALERT: label before .extern or .entry line is meaningless"
+char *warnings[] = {
+        "WARNING: label before .extern or .entry line is meaningless"
 };

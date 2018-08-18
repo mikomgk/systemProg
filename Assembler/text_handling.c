@@ -45,7 +45,12 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
     *operandB = NULL;
     /*count spaces and commas*/
     for (; *pnt; pnt++) {
-        if (!is_brackets&&!is_string&&!is_data&&*pnt == ' ')
+        if (is_brackets && *(pnt - 1) == ')') {
+            /*another word after brackets*/
+            insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
+            return 0;
+        }
+        if (!is_brackets && !is_string && !is_data && *pnt == ' ')
             count_spaces++;
         else if (*pnt == ',') {
             count_commas++;
@@ -72,7 +77,6 @@ int parse(char *trimmed_line, char **label, char **operation, char **operandA, c
     } else if (count_spaces > 2) {
         if (is_brackets && count_commas == 1)
             insert_error_message(ERR_SPACE_BETWEEN_PARAMS);
-        else
             /*too many spaces*/
             insert_error_message(ERR_MISSING_COMMA);
         return 0;
@@ -171,11 +175,22 @@ int is_label_ok(char *label, int print_error, int is_extern) {
 }
 
 int is_string_ok(char *string) {
-    if (*string != '\"')
-        return 0;
-    for (; *string; string++)
-        /**/;
-    if (*--string != '\"')
-        return 0;
-    return 1;
+    int is_error = 0;
+    char *ptr = NULL, *last_Qmark;
+    if (*string != '\"') {
+        /*no leading quotation mark*/
+        insert_error_message(ERR_MISSING_QUOTATION_MARK);
+        is_error = 1;
+    }
+    last_Qmark = strrchr(string, '\"');
+    if (!last_Qmark || last_Qmark == string) {
+        /*no ending quotation mark*/
+        insert_error_message(ERR_MISSING_QUOTATION_MARK);
+        is_error = 1;
+    } else if (*++last_Qmark) {
+        /*another word after string*/
+        insert_error_message(ERR_WRONG_NUMBER_OF_OPERATORS);
+        is_error = 1;
+    }
+    return is_error ? 0 : 1;
 }
